@@ -1,0 +1,6 @@
+line-length = 88
+select = ["E", "F", "I"]
+exclude = ["notebooks/"]
+
+[per-file-ignores]
+"tests/*" = ["F401"]

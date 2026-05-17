@@ -1,0 +1,10 @@
+transformers
+torch
+datasets
+shap
+scikit-learn
+pandas
+numpy
+streamlit
+pytest
+ruff
