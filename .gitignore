@@ -4,4 +4,6 @@ __pycache__/
 .env
 data/raw/
 outputs/
-.DS_Store.venv/
+.DS_Store
+.venv/
+.venv-1/
