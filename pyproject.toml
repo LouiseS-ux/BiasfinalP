@@ -1,0 +1,45 @@
+[project]
+name = "gender-bias-auditing-tool"
+version = "0.1.0"
+description = "A five-stage pipeline to detect implicit gender bias in LLM outputs using a fine-tuned RoBERTa classifier with SHAP explainability."
+requires-python = ">=3.11"
+
+dependencies = [
+    "transformers>=4.40",
+    "torch>=2.2",
+    "datasets>=2.18",
+    "shap>=0.45",
+    "streamlit>=1.35",
+    "plotly>=5.20",
+    "openai>=1.20",
+    "anthropic>=0.25",
+    "python-dotenv>=1.0",
+    "pandas>=2.2",
+    "scikit-learn>=1.4",
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+    "numpy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pre-commit",
+    "ruff",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ANN"]
+ignore = ["ANN101", "ANN102"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src --cov-report=term-missing"
