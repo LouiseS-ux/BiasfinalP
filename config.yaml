@@ -5,12 +5,13 @@ llms:
 probe_bank:
   target_pairs: 150
   sources:
-    - winobias        # restructured into conversational prompts
-    - original        # hand-written probes to test generalisation
+    - winobias        # professional roles and coreference ambiguity
+    - original        # personality descriptors and scenario-based
   categories:
-    - professional_role
-    - personality_trait
-    - ambiguous_scenario
+    - professional_role       # 50 pairs: WinoBias + original
+    - personality_trait       # 40 pairs: original only
+    - ambiguous_scenario      # 40 pairs: original only
+    - coreference_ambiguity   # 20 pairs: WinoBias only
 
 classifier:
   training_data: stereoset   # StereoSet only — kept separate from probe sources
