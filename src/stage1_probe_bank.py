@@ -23,6 +23,7 @@ def main() -> None:
     raise NotImplementedError("Stage 1 not yet implemented.")
 
 
+# only run this if this file was called directly." It calls main() to kick things off -
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     main()

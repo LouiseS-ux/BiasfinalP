@@ -1,9 +1,8 @@
 """
 Stage 3 — RoBERTa Classifier.
 
-Responsibility: Fine-tunes roberta-base on StereoSet labelled data only
-(kept separate from probe sources to avoid data leakage), then runs
-inference over all completions. Two modes via --mode flag:
+Objective - Fine-tunes classifier head on roberta-base model on StereoSet labelled data.
+Runs inference over all completions. Two modes via --mode flag:
   --mode train     Fine-tune and save best checkpoint by eval F1.
   --mode inference Load checkpoint, write predictions.json and
                    summary_stats.json.
