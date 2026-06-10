@@ -10,12 +10,11 @@ A five-stage automated pipeline that detects implicit gender bias in LLM outputs
 
 | Stage | Dataset | Purpose |
 |---|---|---|
-| Stage 1 — probe bank | WinoBias + original probes | Restructured into conversational LLM prompts |
-| Stage 3 — RoBERTa training | StereoSet only | Labelled training data for the classifier |
+| Stage 1  probe bank | WinoBias + original probes | Restructured into conversational LLM prompts |
+| Stage 2  LLM query runner | GPT-4o and claude-opus-4-5 | Queries both models with all probes, collects LLM text completions |
+| Stage 3  classifier fine-tuning | StereoSet data used to fine-tune classifier | Fine-tunes pretrained RoBERTa base model with a classification head added, for binary bias detection |
+| Stage 4  SHAP explainability | Applies SHAP to the fine-tuned classifier to produce token-level attribution scores |
 
-Datasets are kept separate to avoid data leakage — RoBERTa never trains on the same source material used to build the probes.
-
----
 
 ## Setup
 
@@ -44,6 +43,10 @@ pre-commit install
 ## Run the pipeline
 
 ```bash
+# Run all stages in sequence
+python run_pipeline.py
+
+# Or run stages individually:
 python src/stage1_probe_bank.py
 python src/stage2_query_llm.py
 python src/stage3_classifier.py --mode train
