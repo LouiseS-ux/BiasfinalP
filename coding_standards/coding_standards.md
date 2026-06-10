@@ -188,7 +188,7 @@ Never use bare dicts to pass structured data between modules.
 
 ### `src/stage1_probe_bank.py`
 
-Builds the gender-paired prompt dataset from WinoBias and StereoSet source files in `data/raw/`. Writes `data/probe_bank.json`. Assigns stable `probe_id` values using the format `wb_001`, `ss_042` etc. Done when the file has at least 200 rows with no duplicate IDs.
+Builds the gender-paired prompt dataset from WinoBias source files, and original hand-crafted probes adding both in `data/raw/`. Writes `data/probe_bank.json`. Assigns stable `probe_id` values using the format `wb_001`, `orig_001` etc. Done when the file has at least 300 rows with no duplicate IDs.
 
 ### `src/stage2_query_llm.py`
 
@@ -198,7 +198,7 @@ Feeds each probe to each configured LLM and collects completions into `data/comp
 
 Runs in two modes via a `--mode` flag:
 
-- `--mode train` — fine-tunes `roberta-base` on a labelled bias dataset, saves the best checkpoint (by eval F1) to `models/roberta_finetuned/`, logs metrics to console and `metrics.json`. Target F1 is 0.75 or above on the held-out test set.
+- `--mode train` — fine-tunes `roberta-base` on a Stereoset labelled bias dataset, saves the best checkpoint (by eval F1) to `models/roberta_finetuned/`, logs metrics to console and `metrics.json`. Target F1 is 0.75 or above on the held-out test set.
 - `--mode inference` — loads the saved checkpoint, runs over all completions, writes `data/predictions.json` and `data/summary_stats.json`.
 
 Use the HuggingFace Trainer API. Training config lives in `config.yaml` under the `classifier:` key, not hardcoded.
