@@ -15,7 +15,6 @@ venv/
 .env
 
 # Raw source data
-data/raw/
 
 # Model weights (too large for Git)
 models/roberta_finetuned/
@@ -30,3 +29,8 @@ outputs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Large pipeline outputs (regenerate by running the pipeline)
+data/completions.json
+data/predictions.json
+data/shap_values.json
