@@ -69,6 +69,11 @@ class TestLoadProbeBank:
             assert p.probe_id and p.category and p.role
             assert p.source and p.male_prompt and p.female_prompt
 
+    def test_male_and_female_prompts_differ(self) -> None:
+        probes = load_probe_bank(_FIXTURES_DIR / "probe_bank.json")
+        for p in probes:
+            assert p.male_prompt != p.female_prompt
+
     def test_raises_on_missing_field(self, tmp_path: Path) -> None:
         bad = [{"probe_id": "wb_001", "category": "professional_role"}]
         f = tmp_path / "bad.json"
