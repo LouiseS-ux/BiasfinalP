@@ -26,7 +26,10 @@ classifier:
 
 api:
   call_delay_seconds: 0.5
-  max_completions_per_run: 500
+  max_retries: 3
+  models:
+    openai: gpt-4o
+    anthropic: claude-opus-4-5
 
 paths:
   raw_data: data/raw/
