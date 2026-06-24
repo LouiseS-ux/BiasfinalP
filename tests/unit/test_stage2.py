@@ -56,6 +56,13 @@ class _FakeAnthropicError(anthropic.APIError):
         Exception.__init__(self, "test error")
 
 
+class _FakeAnthropicRateLimitError(anthropic.RateLimitError):
+    """Minimal RateLimitError subclass for testing retry behaviour."""
+
+    def __init__(self) -> None:
+        Exception.__init__(self, "rate limited")
+
+
 class TestCompletionRecordSchema:
     """Tests that completions_fixture.json entries satisfy the Section 5.2 schema."""
 
@@ -120,6 +127,34 @@ class TestOpenAIAdapter:
             with pytest.raises(LLMError):
                 adapter.complete("prompt", "wb_001", "male")
 
+    def test_retries_on_429_then_succeeds(self) -> None:
+        mock_response = MagicMock()
+        mock_response.usage.total_tokens = 10
+        mock_response.choices[0].message.content = "Retry success."
+        call_count = 0
+
+        def _side_effect(*args: object, **kwargs: object) -> MagicMock:
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise openai.RateLimitError(
+                    message="rate limited", response=MagicMock(), body=None
+                )
+            return mock_response
+
+        with (
+            patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}),
+            patch("openai.OpenAI") as mock_cls,
+            patch("src.adapters.openai_adapter.time.sleep") as mock_sleep,
+        ):
+            mock_cls.return_value.chat.completions.create.side_effect = _side_effect
+            adapter = OpenAIAdapter(_CONFIG_OPENAI)
+            record = adapter.complete("A man in a meeting.", "wb_001", "male")
+
+        assert isinstance(record, CompletionRecord)
+        assert mock_cls.return_value.chat.completions.create.call_count == 2
+        mock_sleep.assert_called_once()
+
 
 class TestAnthropicAdapter:
     """Tests for AnthropicAdapter using a mocked Anthropic client."""
@@ -156,6 +191,35 @@ class TestAnthropicAdapter:
             adapter = AnthropicAdapter(_CONFIG_ANTHROPIC)
             with pytest.raises(LLMError):
                 adapter.complete("prompt", "wb_002", "female")
+
+    def test_retries_on_429_then_succeeds(self) -> None:
+        mock_text = MagicMock()
+        mock_text.text = "Retry success."
+        mock_response = MagicMock()
+        mock_response.content = [mock_text]
+        mock_response.usage.input_tokens = 5
+        mock_response.usage.output_tokens = 5
+        call_count = 0
+
+        def _side_effect(*args: object, **kwargs: object) -> MagicMock:
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise _FakeAnthropicRateLimitError()
+            return mock_response
+
+        with (
+            patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key"}),
+            patch("anthropic.Anthropic") as mock_cls,
+            patch("src.adapters.anthropic_adapter.time.sleep") as mock_sleep,
+        ):
+            mock_cls.return_value.messages.create.side_effect = _side_effect
+            adapter = AnthropicAdapter(_CONFIG_ANTHROPIC)
+            record = adapter.complete("A woman in a meeting.", "wb_002", "female")
+
+        assert isinstance(record, CompletionRecord)
+        assert mock_cls.return_value.messages.create.call_count == 2
+        mock_sleep.assert_called_once()
 
 
 class TestRunQueries:
