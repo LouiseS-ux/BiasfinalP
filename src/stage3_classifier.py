@@ -199,7 +199,7 @@ def run_train(config: dict[str, Any]) -> None:
     trainer = Trainer(
         model=model,
         args=training_args,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         train_dataset=tokenized_train,
         eval_dataset=tokenized_test,
         compute_metrics=_compute_metrics,
