@@ -24,7 +24,7 @@ classifier:
   target_f1: 0.75
   seed: 42
   weight_decay: 0.01
-  evaluation_strategy: epoch
+  eval_strategy: epoch
 
 api:
   call_delay_seconds: 0.5

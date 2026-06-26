@@ -188,7 +188,7 @@ def run_train(config: dict[str, Any]) -> None:
         per_device_eval_batch_size=clf["batch_size"],
         learning_rate=clf["learning_rate"],
         weight_decay=clf["weight_decay"],
-        evaluation_strategy=clf["evaluation_strategy"],
+        eval_strategy=clf["eval_strategy"],
         save_strategy=clf["evaluation_strategy"],
         load_best_model_at_end=True,
         metric_for_best_model="eval_f1",
