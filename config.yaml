@@ -17,8 +17,8 @@ classifier:
   training_data: stereoset   # StereoSet only — kept separate from probe sources
   model_name: roberta-base
   num_epochs: 3
-  batch_size: 16
-  learning_rate: 2e-5
+  batch_size: 8
+  learning_rate: 0.00002
   max_seq_length: 256
   output_dir: models/roberta_finetuned/
   target_f1: 0.75
