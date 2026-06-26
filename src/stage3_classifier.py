@@ -189,7 +189,7 @@ def run_train(config: dict[str, Any]) -> None:
         learning_rate=clf["learning_rate"],
         weight_decay=clf["weight_decay"],
         eval_strategy=clf["eval_strategy"],
-        save_strategy=clf["evaluation_strategy"],
+        save_strategy=clf["eval_strategy"],
         load_best_model_at_end=True,
         metric_for_best_model="eval_f1",
         save_total_limit=1,
