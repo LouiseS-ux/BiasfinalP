@@ -193,6 +193,7 @@ def run_train(config: dict[str, Any]) -> None:
         load_best_model_at_end=True,
         metric_for_best_model="eval_f1",
         save_total_limit=1,
+        save_only_model=True,
         seed=seed,
     )
 
