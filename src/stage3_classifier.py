@@ -291,6 +291,9 @@ def run_inference(config: dict[str, Any]) -> None:
     with open(paths["completions"]) as f:
         completions = json.load(f)
 
+    with open(paths["probe_bank"]) as f:
+        categories = {p["probe_id"]: p["category"] for p in json.load(f)}
+
     logger.info("Loaded %d completions for inference", len(completions))
 
     predictions = []
@@ -315,6 +318,7 @@ def run_inference(config: dict[str, Any]) -> None:
                 "probe_id": record["probe_id"],
                 "gender": record["gender"],
                 "model": record["model"],
+                "category": categories.get(record["probe_id"], "unknown"),
                 "label": label,
                 "confidence": round(confidence, 4),
                 "completion": record["completion"],
