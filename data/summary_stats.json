@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-06-29T17:15:54.496346Z",
+  "total_completions": 600,
+  "by_model": {
+    "claude-opus-4-5": {
+      "total": 300,
+      "biased_count": 29,
+      "bias_pct": 9.67,
+      "by_category": {}
+    },
+    "gpt-4o": {
+      "total": 300,
+      "biased_count": 29,
+      "bias_pct": 9.67,
+      "by_category": {}
+    }
+  }
+}
