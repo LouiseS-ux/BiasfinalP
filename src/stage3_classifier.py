@@ -48,28 +48,26 @@ def _set_seeds(seed: int) -> None:
 
 
 def _load_stereoset(raw_data_dir: str) -> pd.DataFrame:
-    """Load dev.json, filter gender rows from both splits, return labelled DataFrame."""
+    """Load dev.json, filter gender intersentence rows, return labelled DataFrame."""
     path = Path(raw_data_dir) / "dev.json"
     with open(path) as f:
         raw = json.load(f)
 
     rows = []
-    for split in ["intersentence", "intrasentence"]:
-        for item in raw["data"][split]:
-            if item["bias_type"] != "gender":
+    for item in raw["data"]["intersentence"]:
+        if item["bias_type"] != "gender":
+            continue
+        for sent in item["sentences"]:
+            if sent["gold_label"] == "unrelated":
                 continue
-            for sent in item["sentences"]:
-                if sent["gold_label"] == "unrelated":
-                    continue
-                rows.append(
-                    {
-                        "id": f"{split}_{sent['id']}",
-                        "text": sent["sentence"],
-                        "label": 1 if sent["gold_label"] == "stereotype" else 0,
-                        "context": item["context"],
-                        "split": split,
-                    }
-                )
+            rows.append(
+                {
+                    "id": sent["id"],
+                    "text": sent["sentence"],
+                    "label": 1 if sent["gold_label"] == "stereotype" else 0,
+                    "context": item["context"],
+                }
+            )
 
     df = pd.DataFrame(rows)
     assert df["id"].nunique() == len(
@@ -146,26 +144,6 @@ def _write_metrics(
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
     logger.info("Metrics written to %s", metrics_path)
-
-
-def _evaluate_by_split(
-    trainer: Trainer,
-    test_df: pd.DataFrame,
-    tokenizer: PreTrainedTokenizerBase,
-    max_length: int,
-) -> None:
-    """Evaluate the model separately on intersentence and intrasentence test rows."""
-    for split_name in ["intersentence", "intrasentence"]:
-        split_df = test_df[test_df["split"] == split_name].reset_index(drop=True)
-        split_dataset = _tokenize_dataset(split_df, tokenizer, max_length)
-        split_results = trainer.evaluate(split_dataset)
-        logger.info(
-            "%s F1: %.4f, Precision: %.4f, Recall: %.4f",
-            split_name,
-            split_results["eval_f1"],
-            split_results["eval_precision"],
-            split_results["eval_recall"],
-        )
 
 
 def _write_summary_stats(
@@ -270,8 +248,6 @@ def run_train(config: dict[str, Any]) -> None:
     trainer.train()
     trainer.save_model(output_dir)
     logger.info("Model saved to %s", output_dir)
-
-    _evaluate_by_split(trainer, test_df, tokenizer, max_length)
 
     eval_results = trainer.evaluate()
     f1 = eval_results.get("eval_f1", 0.0)
