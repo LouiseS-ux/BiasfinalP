@@ -47,32 +47,34 @@ def _set_seeds(seed: int) -> None:
 
 
 def _load_stereoset(raw_data_dir: str) -> pd.DataFrame:
-    """Load dev.json, filter to gender rows, and map labels to binary ints."""
+    """Load dev.json, filter gender rows-both splits, map labels to binary"""
     path = Path(raw_data_dir) / "dev.json"
     with open(path) as f:
         raw = json.load(f)
 
-    df = pd.DataFrame(
-        [
-            {
-                "id": sent["id"],
-                "text": sent["sentence"],
-                "label": 1 if sent["gold_label"] == "stereotype" else 0,
-                "context": item["context"],
-            }
-            for item in raw["data"]["intersentence"]
-            for sent in item["sentences"]
-            if item["bias_type"] == "gender" and sent["gold_label"] != "unrelated"
-        ]
-    )
+    rows = []
+    for split in ["intersentence", "intrasentence"]:
+        for item in raw["data"][split]:
+            if item["bias_type"] != "gender":
+                continue
+            for sent in item["sentences"]:
+                if sent["gold_label"] == "unrelated":
+                    continue
+                rows.append(
+                    {
+                        "id": f"{split}_{sent['id']}",
+                        "text": sent["sentence"],
+                        "label": 1 if sent["gold_label"] == "stereotype" else 0,
+                        "context": item["context"],
+                        "split": split,
+                    }
+                )
 
+    df = pd.DataFrame(rows)
     assert df["id"].nunique() == len(
         df
     ), "Duplicate sentence IDs found in StereoSet data"
-    logger.info(
-        "Loaded %d rows from StereoSet (gender, stereotype/anti-stereotype only)",
-        len(df),
-    )
+    logger.info("Loaded %d rows from StereoSet (gender only)", len(df))
     return df
 
 
@@ -145,6 +147,26 @@ def _write_metrics(
     logger.info("Metrics written to %s", metrics_path)
 
 
+def _evaluate_by_split(
+    trainer: Trainer,
+    test_df: pd.DataFrame,
+    tokenizer: PreTrainedTokenizerBase,
+    max_length: int,
+) -> None:
+    """Evaluate trained model separately on inter vs intrasentence test rows."""
+    for split_name in ["intersentence", "intrasentence"]:
+        split_df = test_df[test_df["split"] == split_name].reset_index(drop=True)
+        split_dataset = _tokenize_dataset(split_df, tokenizer, max_length)
+        split_results = trainer.evaluate(split_dataset)
+        logger.info(
+            "%s F1: %.4f, Precision: %.4f, Recall: %.4f",
+            split_name,
+            split_results["eval_f1"],
+            split_results["eval_precision"],
+            split_results["eval_recall"],
+        )
+
+
 def run_train(config: dict[str, Any]) -> None:
     """Fine-tune RoBERTa on StereoSet gender data and save the best checkpoint."""
     clf = config["classifier"]
@@ -212,6 +234,8 @@ def run_train(config: dict[str, Any]) -> None:
     trainer.train()
     trainer.save_model(output_dir)
     logger.info("Model saved to %s", output_dir)
+
+    _evaluate_by_split(trainer, test_df, tokenizer, max_length)
 
     eval_results = trainer.evaluate()
     f1 = eval_results.get("eval_f1", 0.0)
