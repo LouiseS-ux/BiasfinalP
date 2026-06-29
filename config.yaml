@@ -14,17 +14,18 @@ probe_bank:
     - coreference_ambiguity   # 20 pairs: WinoBias only
 
 classifier:
-  training_data: stereoset   # StereoSet only — kept separate from probe sources
+  training_data: stereoset  
   model_name: roberta-base
-  num_epochs: 3
-  batch_size: 16
-  learning_rate: 2e-5
+  num_epochs: 6
+  batch_size: 8
+  learning_rate: 0.00001
   max_seq_length: 256
   output_dir: models/roberta_finetuned/
   target_f1: 0.75
   seed: 42
   weight_decay: 0.01
-  evaluation_strategy: epoch
+  eval_strategy: epoch
+  warmup_steps: 50
 
 api:
   call_delay_seconds: 0.5
