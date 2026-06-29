@@ -174,6 +174,8 @@ def run_train(config: dict[str, Any]) -> None:
         model_name,
         num_labels=2,
         ignore_mismatched_sizes=True,
+        hidden_dropout_prob=0.2,
+        attention_probs_dropout_prob=0.2,
     )
 
     tokenized_train = _tokenize_dataset(train_df, tokenizer, max_length)
@@ -195,6 +197,7 @@ def run_train(config: dict[str, Any]) -> None:
         save_total_limit=1,
         save_only_model=True,
         seed=seed,
+        warmup_steps=clf["warmup_steps"],
     )
 
     trainer = Trainer(
