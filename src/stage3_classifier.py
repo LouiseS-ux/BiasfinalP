@@ -6,6 +6,7 @@ Fine-tunes on StereoSet (--mode train) or classifies completions (--mode inferen
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import logging
 import random
@@ -47,7 +48,7 @@ def _set_seeds(seed: int) -> None:
 
 
 def _load_stereoset(raw_data_dir: str) -> pd.DataFrame:
-    """Load dev.json, filter gender rows-both splits, map labels to binary"""
+    """Load dev.json, filter gender rows from both splits, return labelled DataFrame."""
     path = Path(raw_data_dir) / "dev.json"
     with open(path) as f:
         raw = json.load(f)
@@ -153,7 +154,7 @@ def _evaluate_by_split(
     tokenizer: PreTrainedTokenizerBase,
     max_length: int,
 ) -> None:
-    """Evaluate trained model separately on inter vs intrasentence test rows."""
+    """Evaluate the model separately on intersentence and intrasentence test rows."""
     for split_name in ["intersentence", "intrasentence"]:
         split_df = test_df[test_df["split"] == split_name].reset_index(drop=True)
         split_dataset = _tokenize_dataset(split_df, tokenizer, max_length)
@@ -165,6 +166,41 @@ def _evaluate_by_split(
             split_results["eval_precision"],
             split_results["eval_recall"],
         )
+
+
+def _write_summary_stats(
+    predictions: list[dict[str, Any]],
+    output_path: str,
+) -> None:
+    """Aggregate predictions by model and category and write summary_stats.json."""
+    df = pd.DataFrame(predictions)
+    summary: dict[str, Any] = {
+        "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
+        "total_completions": len(df),
+        "by_model": {},
+    }
+
+    for model_name, model_df in df.groupby("model"):
+        biased = model_df[model_df["label"] == "biased"]
+        by_category: dict[str, Any] = {}
+
+        if "category" in model_df.columns:
+            for cat, cat_df in model_df.groupby("category"):
+                cat_biased = (cat_df["label"] == "biased").sum()
+                by_category[cat] = {
+                    "bias_pct": round(100 * cat_biased / len(cat_df), 2)
+                }
+
+        summary["by_model"][model_name] = {
+            "total": len(model_df),
+            "biased_count": len(biased),
+            "bias_pct": round(100 * len(biased) / len(model_df), 2),
+            "by_category": by_category,
+        }
+
+    with open(output_path, "w") as f:
+        json.dump(summary, f, indent=2)
+    logger.info("Summary stats written to %s", output_path)
 
 
 def run_train(config: dict[str, Any]) -> None:
@@ -264,6 +300,58 @@ def run_train(config: dict[str, Any]) -> None:
     )
 
 
+def run_inference(config: dict[str, Any]) -> None:
+    """Load the fine-tuned classifier and classify all completions."""
+    clf = config["classifier"]
+    paths = config["paths"]
+
+    output_dir: str = clf["output_dir"]
+    max_length: int = clf["max_seq_length"]
+
+    tokenizer = AutoTokenizer.from_pretrained(output_dir)
+    model = AutoModelForSequenceClassification.from_pretrained(output_dir)
+    model.eval()
+
+    with open(paths["completions"]) as f:
+        completions = json.load(f)
+
+    logger.info("Loaded %d completions for inference", len(completions))
+
+    predictions = []
+    for record in completions:
+        inputs = tokenizer(
+            record["completion"],
+            return_tensors="pt",
+            truncation=True,
+            padding=True,
+            max_length=max_length,
+        )
+        with torch.no_grad():
+            logits = model(**inputs).logits
+
+        probs = torch.softmax(logits, dim=1).squeeze()
+        label_idx = int(torch.argmax(probs))
+        label = "biased" if label_idx == 1 else "not_biased"
+        confidence = float(probs[label_idx])
+
+        predictions.append(
+            {
+                "probe_id": record["probe_id"],
+                "gender": record["gender"],
+                "model": record["model"],
+                "label": label,
+                "confidence": round(confidence, 4),
+                "completion": record["completion"],
+            }
+        )
+
+    with open(paths["predictions"], "w") as f:
+        json.dump(predictions, f, indent=2)
+    logger.info("Predictions written to %s", paths["predictions"])
+
+    _write_summary_stats(predictions, paths["summary_stats"])
+
+
 def main() -> None:
     """Parse --mode argument and dispatch to train or inference."""
     logging.basicConfig(level=logging.INFO)
@@ -282,7 +370,7 @@ def main() -> None:
     if args.mode == "train":
         run_train(config)
     elif args.mode == "inference":
-        raise NotImplementedError("inference mode not yet implemented")
+        run_inference(config)
 
 
 if __name__ == "__main__":
