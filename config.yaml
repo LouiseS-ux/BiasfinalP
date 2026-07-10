@@ -26,6 +26,7 @@ classifier:
   weight_decay: 0.01
   eval_strategy: epoch
   warmup_steps: 50
+  shap_max_evals: 200
 
 api:
   call_delay_seconds: 0.5

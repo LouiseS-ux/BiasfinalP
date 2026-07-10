@@ -1,8 +1,8 @@
 """Stage 4 — SHAP explainer.
 
 Loads the fine-tuned RoBERTa classifier and computes token-level SHAP attribution
-scores for all 600 completions. Writes data/shap_values.json and runs six
-post-hoc evaluation checks on the classifier's behaviour.
+scores for all 600 completions. Writes data/shap_values.json incrementally and
+runs six post-hoc evaluation checks on the classifier's behaviour.
 """
 
 from __future__ import annotations
@@ -10,6 +10,8 @@ from __future__ import annotations
 import json
 import logging
 import re
+import threading
+import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -61,7 +63,7 @@ def _make_predict_fn(
     tokenizer: AutoTokenizer,
     max_length: int,
 ) -> Callable[..., np.ndarray]:
-    """Return a prediction function, outputs logit scores for the biased class."""
+    """Return a prediction function that outputs logit scores for the biased class."""
 
     def predict(texts: list[str]) -> np.ndarray:
         """Score a batch of texts, returning logit for the biased class (label 1)."""
@@ -80,20 +82,36 @@ def _make_predict_fn(
     return predict
 
 
-def _run_shap(
-    texts: list[str],
-    predict_fn: Callable[..., np.ndarray],
-    tokenizer: AutoTokenizer,
-) -> list[tuple[list[str], list[float]]]:
-    """Run SHAP on texts, return (token_list, shap_values) per text."""
-    explainer = shap.Explainer(predict_fn, tokenizer)
-    shap_values = explainer(texts, fixed_context=1)
-    results = []
-    for i in range(len(texts)):
-        tokens = shap_values[i].data.tolist()
-        values = shap_values[i].values.tolist()
-        results.append((tokens, values))
-    return results
+def _keep_alive(interval_seconds: int = 1200) -> None:
+    """Log a keep-alive ping every interval_seconds to prevent session timeout."""
+    while True:
+        time.sleep(interval_seconds)
+        logger.info("Keep-alive ping — SHAP still running")
+
+
+def _load_existing_shap(
+    shap_path: str,
+) -> tuple[list[dict[str, Any]], set[tuple[str, str, str]]]:
+    """Load existing shap_values.json and return records plus any completed keys."""
+    path = Path(shap_path)
+    if not path.exists():
+        return [], set()
+    with open(shap_path) as f:
+        records = json.load(f)
+    completed = {(r["probe_id"], r["gender"], r["model"]) for r in records}
+    logger.info("Resuming — %d completions already processed", len(records))
+    return records, completed
+
+
+def _append_shap_record(
+    shap_path: str,
+    records: list[dict[str, Any]],
+    new_record: dict[str, Any],
+) -> None:
+    """Append a new SHAP record to the in-memory list and write all to disk."""
+    records.append(new_record)
+    with open(shap_path, "w") as f:
+        json.dump(records, f, indent=2)
 
 
 def _check1_shap_mass(shap_records: list[dict[str, Any]]) -> None:
@@ -242,7 +260,8 @@ def _check5_model_comparison(shap_records: list[dict[str, Any]]) -> None:
 
 
 def _check6_category_attribution(
-    shap_records: list[dict[str, Any]], completions: list[dict[str, Any]]
+    shap_records: list[dict[str, Any]],
+    completions: list[dict[str, Any]],
 ) -> None:
     """Check 6: average positive SHAP attribution by probe category."""
     probe_categories: dict[str, str] = {}
@@ -262,14 +281,20 @@ def _check6_category_attribution(
 
 
 def run_shap(config: dict[str, Any]) -> None:
-    """Run SHAP on all completions and write shap_values.json and evaluation checks."""
+    """Run SHAP on all completions incrementally and write shap_values.json."""
     paths = config["paths"]
     clf = config["classifier"]
     max_length: int = clf["max_seq_length"]
     output_dir: str = clf["output_dir"]
+    max_evals: int = clf.get("shap_max_evals", 200)
+
+    # Start keep-alive thread to prevent session timeout
+    keepalive = threading.Thread(target=_keep_alive, daemon=True)
+    keepalive.start()
 
     model, tokenizer = _load_model_and_tokenizer(output_dir)
     predict_fn = _make_predict_fn(model, tokenizer, max_length)
+    explainer = shap.Explainer(predict_fn, tokenizer)
 
     with open(paths["completions"]) as f:
         completions = json.load(f)
@@ -280,31 +305,42 @@ def run_shap(config: dict[str, Any]) -> None:
     for record in completions:
         record["category"] = categories.get(record["probe_id"], "unknown")
 
+    Path(paths["shap_values"]).parent.mkdir(parents=True, exist_ok=True)
+    shap_records, completed = _load_existing_shap(paths["shap_values"])
+
+    remaining = [
+        r
+        for r in completions
+        if (r["probe_id"], r["gender"], r["model"]) not in completed
+    ]
+
     logger.info(
-        "Running SHAP on %d completions — this may take several minutes",
+        "Running SHAP on %d completions (%d remaining) with max_evals=%d",
         len(completions),
+        len(remaining),
+        max_evals,
     )
 
-    texts = [r["completion"] for r in completions]
-    shap_results = _run_shap(texts, predict_fn, tokenizer)
-
-    shap_records = []
-    for record, (tokens, values) in zip(completions, shap_results, strict=False):
-        shap_records.append(
-            {
-                "probe_id": record["probe_id"],
-                "gender": record["gender"],
-                "model": record["model"],
-                "tokens": tokens,
-                "shap": [round(v, 6) for v in values],
-            }
+    for i, record in enumerate(remaining):
+        shap_vals = explainer(
+            [record["completion"]],
+            fixed_context=1,
+            max_evals=max_evals,
         )
+        tokens = shap_vals[0].data.tolist()
+        values = shap_vals[0].values.tolist()
+        new_record = {
+            "probe_id": record["probe_id"],
+            "gender": record["gender"],
+            "model": record["model"],
+            "tokens": tokens,
+            "shap": [round(v, 6) for v in values],
+        }
+        _append_shap_record(paths["shap_values"], shap_records, new_record)
+        if (i + 1) % 10 == 0:
+            logger.info("Progress: %d/%d completions processed", i + 1, len(remaining))
 
-    Path(paths["shap_values"]).parent.mkdir(parents=True, exist_ok=True)
-    with open(paths["shap_values"], "w") as f:
-        json.dump(shap_records, f, indent=2)
     logger.info("SHAP values written to %s", paths["shap_values"])
-
     logger.info("Running post-hoc evaluation checks...")
     _check1_shap_mass(shap_records)
     _check2_pronoun_masking(completions, predict_fn)
