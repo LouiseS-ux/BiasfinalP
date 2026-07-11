@@ -3,6 +3,7 @@
 Loads the fine-tuned RoBERTa classifier and computes token-level SHAP attribution
 scores for all 600 completions. Writes data/shap_values.json incrementally and
 runs six post-hoc evaluation checks on the classifier's behaviour.
+Results are saved to data/shap_summary.json.
 """
 
 from __future__ import annotations
@@ -92,7 +93,7 @@ def _keep_alive(interval_seconds: int = 1200) -> None:
 def _load_existing_shap(
     shap_path: str,
 ) -> tuple[list[dict[str, Any]], set[tuple[str, str, str]]]:
-    """Load existing shap_values.json and return records plus any completed keys."""
+    """Load existing shap_values.json, return records and set of completed keys."""
     path = Path(shap_path)
     if not path.exists():
         return [], set()
@@ -114,18 +115,16 @@ def _append_shap_record(
         json.dump(records, f, indent=2)
 
 
-def _check1_shap_mass(shap_records: list[dict[str, Any]]) -> None:
+def _check1_shap_mass(shap_records: list[dict[str, Any]]) -> dict[str, Any]:
     """Check 1: compute pronoun vs non-pronoun SHAP mass distribution."""
     pronoun_mass = []
     total_mass = []
     for rec in shap_records:
-        tokens = rec["tokens"]
-        values = rec["shap"]
-        pos_values = [max(v, 0.0) for v in values]
+        pos_values = [max(v, 0.0) for v in rec["shap"]]
         total = sum(pos_values)
         pronoun = sum(
             v
-            for t, v in zip(tokens, pos_values, strict=False)
+            for t, v in zip(rec["tokens"], pos_values, strict=False)
             if t.strip() in _PRONOUNS
         )
         if total > 0:
@@ -137,12 +136,13 @@ def _check1_shap_mass(shap_records: list[dict[str, Any]]) -> None:
         "Check 1 — Pronoun SHAP mass: %.1f%% of positive attribution on average",
         avg_pronoun_pct,
     )
+    return {"avg_pronoun_attribution_pct": round(avg_pronoun_pct, 2)}
 
 
 def _check2_pronoun_masking(
     completions: list[dict[str, Any]],
     predict_fn: Callable[..., np.ndarray],
-) -> None:
+) -> dict[str, Any]:
     """Check 2: mask gendered pronouns with [PERSON] and compare labels."""
     flipped = 0
     total = 0
@@ -153,24 +153,24 @@ def _check2_pronoun_masking(
             "[PERSON]",
             original,
         )
-        orig_score = float(predict_fn([original])[0])
-        mask_score = float(predict_fn([masked])[0])
-        orig_label = "biased" if orig_score > 0 else "not_biased"
-        mask_label = "biased" if mask_score > 0 else "not_biased"
+        orig_label = "biased" if float(predict_fn([original])[0]) > 0 else "not_biased"
+        mask_label = "biased" if float(predict_fn([masked])[0]) > 0 else "not_biased"
         if orig_label != mask_label:
             flipped += 1
         total += 1
 
+    flip_pct = round(100 * flipped / total, 2) if total > 0 else 0.0
     logger.info(
         "Check 2 — Pronoun masking: %d/%d completions flipped label after masking"
         " (%.1f%%)",
         flipped,
         total,
-        100 * flipped / total if total > 0 else 0.0,
+        flip_pct,
     )
+    return {"flipped": flipped, "total": total, "flip_pct": flip_pct}
 
 
-def _check3_paired_shap(shap_records: list[dict[str, Any]]) -> None:
+def _check3_paired_shap(shap_records: list[dict[str, Any]]) -> dict[str, Any]:
     """Check 3: compare male vs female SHAP top tokens per probe."""
     by_probe: dict[str, dict[str, list[tuple[str, float]]]] = {}
     for rec in shap_records:
@@ -186,8 +186,10 @@ def _check3_paired_shap(shap_records: list[dict[str, Any]]) -> None:
         by_probe[pid][gender] = top
 
     asymmetric = 0
+    total_pairs = 0
     for _, genders in by_probe.items():
         if "male" in genders and "female" in genders:
+            total_pairs += 1
             male_tokens = {t.strip() for t, _ in genders["male"]}
             female_tokens = {t.strip() for t, _ in genders["female"]}
             if male_tokens != female_tokens:
@@ -196,11 +198,12 @@ def _check3_paired_shap(shap_records: list[dict[str, Any]]) -> None:
     logger.info(
         "Check 3 — Paired SHAP: %d/%d probe pairs show asymmetric top tokens",
         asymmetric,
-        len(by_probe),
+        total_pairs,
     )
+    return {"asymmetric_pairs": asymmetric, "total_pairs": total_pairs}
 
 
-def _check4_nonpronoun_tokens(shap_records: list[dict[str, Any]]) -> None:
+def _check4_nonpronoun_tokens(shap_records: list[dict[str, Any]]) -> dict[str, Any]:
     """Check 4: rank non-pronoun tokens by mean positive SHAP attribution."""
     token_scores: dict[str, list[float]] = {}
     for rec in shap_records:
@@ -220,9 +223,14 @@ def _check4_nonpronoun_tokens(shap_records: list[dict[str, Any]]) -> None:
     logger.info("Check 4 — Top non-pronoun bias tokens:")
     for token, score in ranked:
         logger.info("  %-20s %.4f", token, score)
+    return {
+        "top_nonpronoun_tokens": [
+            {"token": t, "mean_shap": round(s, 4)} for t, s in ranked
+        ]
+    }
 
 
-def _check5_model_comparison(shap_records: list[dict[str, Any]]) -> None:
+def _check5_model_comparison(shap_records: list[dict[str, Any]]) -> dict[str, Any]:
     """Check 5: compare top SHAP tokens between GPT-4o and Claude per probe."""
     by_probe: dict[str, dict[str, set[str]]] = {}
     for rec in shap_records:
@@ -257,12 +265,13 @@ def _check5_model_comparison(shap_records: list[dict[str, Any]]) -> None:
         shared,
         divergent,
     )
+    return {"shared_probes": shared, "divergent_probes": divergent}
 
 
 def _check6_category_attribution(
     shap_records: list[dict[str, Any]],
     completions: list[dict[str, Any]],
-) -> None:
+) -> dict[str, Any]:
     """Check 6: average positive SHAP attribution by probe category."""
     probe_categories: dict[str, str] = {}
     for rec in completions:
@@ -275,9 +284,30 @@ def _check6_category_attribution(
         total_pos = sum(max(v, 0.0) for v in rec["shap"])
         category_scores.setdefault(category, []).append(total_pos)
 
+    results = {}
     logger.info("Check 6 — Mean positive SHAP attribution by category:")
     for cat, scores in sorted(category_scores.items()):
-        logger.info("  %-30s %.4f", cat, float(np.mean(scores)))
+        mean = round(float(np.mean(scores)), 4)
+        results[cat] = mean
+        logger.info("  %-30s %.4f", cat, mean)
+    return {"by_category": results}
+
+
+def _write_shap_summary(
+    summary_path: str,
+    check_results: dict[str, Any],
+    total_completions: int,
+    max_evals: int,
+) -> None:
+    """Write all six check results to shap_summary.json."""
+    summary = {
+        "total_completions": total_completions,
+        "max_evals": max_evals,
+        "checks": check_results,
+    }
+    with open(summary_path, "w") as f:
+        json.dump(summary, f, indent=2)
+    logger.info("SHAP summary written to %s", summary_path)
 
 
 def run_shap(config: dict[str, Any]) -> None:
@@ -288,7 +318,6 @@ def run_shap(config: dict[str, Any]) -> None:
     output_dir: str = clf["output_dir"]
     max_evals: int = clf.get("shap_max_evals", 200)
 
-    # Start keep-alive thread to prevent session timeout
     keepalive = threading.Thread(target=_keep_alive, daemon=True)
     keepalive.start()
 
@@ -342,12 +371,24 @@ def run_shap(config: dict[str, Any]) -> None:
 
     logger.info("SHAP values written to %s", paths["shap_values"])
     logger.info("Running post-hoc evaluation checks...")
-    _check1_shap_mass(shap_records)
-    _check2_pronoun_masking(completions, predict_fn)
-    _check3_paired_shap(shap_records)
-    _check4_nonpronoun_tokens(shap_records)
-    _check5_model_comparison(shap_records)
-    _check6_category_attribution(shap_records, completions)
+
+    check_results = {
+        "check1_pronoun_mass": _check1_shap_mass(shap_records),
+        "check2_pronoun_masking": _check2_pronoun_masking(completions, predict_fn),
+        "check3_paired_shap": _check3_paired_shap(shap_records),
+        "check4_nonpronoun_tokens": _check4_nonpronoun_tokens(shap_records),
+        "check5_model_comparison": _check5_model_comparison(shap_records),
+        "check6_category_attribution": _check6_category_attribution(
+            shap_records, completions
+        ),
+    }
+
+    _write_shap_summary(
+        paths["shap_summary"],
+        check_results,
+        total_completions=len(completions),
+        max_evals=max_evals,
+    )
 
 
 def main() -> None:

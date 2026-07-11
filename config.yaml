@@ -41,6 +41,7 @@ paths:
   completions: data/completions.json
   predictions: data/predictions.json
   summary_stats: data/summary_stats.json
+  shap_summary: data/shap_summary.json
   shap_values: data/shap_values.json
   metrics: models/roberta_finetuned/metrics.json
 
