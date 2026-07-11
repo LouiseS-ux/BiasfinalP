@@ -33,5 +33,4 @@ Thumbs.db
 # Large pipeline outputs (regenerate by running the pipeline)
 data/completions.json
 data/predictions.json
-data/shap_values.json
 .coverage
