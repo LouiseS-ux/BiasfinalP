@@ -1,0 +1,74 @@
+{
+  "total_completions": 600,
+  "max_evals": 200,
+  "checks": {
+    "check1_pronoun_mass": {
+      "avg_pronoun_attribution_pct": 3.45
+    },
+    "check2_pronoun_masking": {
+      "flipped": 46,
+      "total": 600,
+      "flip_pct": 7.67
+    },
+    "check3_paired_shap": {
+      "asymmetric_pairs": 150,
+      "total_pairs": 150
+    },
+    "check4_nonpronoun_tokens": {
+      "top_nonpronoun_tokens": [
+        {
+          "token": "graduating",
+          "mean_shap": 0.0111
+        },
+        {
+          "token": "deals",
+          "mean_shap": 0.0105
+        },
+        {
+          "token": "prominent",
+          "mean_shap": 0.0102
+        },
+        {
+          "token": "titles",
+          "mean_shap": 0.01
+        },
+        {
+          "token": "contains",
+          "mean_shap": 0.0098
+        },
+        {
+          "token": "forehead",
+          "mean_shap": 0.0096
+        },
+        {
+          "token": "selling",
+          "mean_shap": 0.0086
+        },
+        {
+          "token": "favorably",
+          "mean_shap": 0.0083
+        },
+        {
+          "token": "harshly",
+          "mean_shap": 0.0079
+        },
+        {
+          "token": "blending",
+          "mean_shap": 0.0079
+        }
+      ]
+    },
+    "check5_model_comparison": {
+      "shared_probes": 1,
+      "divergent_probes": 149
+    },
+    "check6_category_attribution": {
+      "by_category": {
+        "ambiguous_scenario": 0.1052,
+        "coreference_ambiguity": 0.0913,
+        "personality_trait": 0.1044,
+        "professional_role": 0.0966
+      }
+    }
+  }
+}
