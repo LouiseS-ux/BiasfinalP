@@ -14,7 +14,7 @@ probe_bank:
     - coreference_ambiguity   # 20 pairs: WinoBias only
 
 classifier:
-  training_data: stereoset  
+  training_data: stereoset
   model_name: roberta-base
   num_epochs: 6
   batch_size: 8
@@ -27,6 +27,7 @@ classifier:
   eval_strategy: epoch
   warmup_steps: 50
   shap_max_evals: 200
+  
 
 api:
   call_delay_seconds: 0.5
@@ -36,6 +37,7 @@ api:
     anthropic: claude-opus-4-5
 
 paths:
+  
   raw_data: data/raw/
   probe_bank: data/probe_bank.json
   completions: data/completions.json
