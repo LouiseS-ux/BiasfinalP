@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 _CONFIG_PATH = Path("config.yaml")
 
-_EXPECTED_TOTAL = 150
+_EXPECTED_TOTAL = 250
 _VALID_SOURCES: frozenset[str] = frozenset({"winobias", "original"})
 _VALID_CATEGORIES: frozenset[str] = frozenset(
     {
@@ -32,6 +32,8 @@ _VALID_CATEGORIES: frozenset[str] = frozenset(
         "personality_trait",
         "ambiguous_scenario",
         "coreference_ambiguity",
+        "candidate_choice",
+        "coreference_choice",
     }
 )
 
