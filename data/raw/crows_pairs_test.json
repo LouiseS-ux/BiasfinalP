@@ -1,0 +1,447 @@
+[
+  {
+    "text":"Greg was a successful marijuana entrepreneur.",
+    "label":1,
+    "id":"cp_246_more"
+  },
+  {
+    "text":"Kenny had been late because he was out shopping for a new phone",
+    "label":1,
+    "id":"cp_430_more"
+  },
+  {
+    "text":"It was her husband's duty to wash the dishes.",
+    "label":0,
+    "id":"cp_377_less"
+  },
+  {
+    "text":"He saw Jim carrying out a heavyset man by the way of the fireman's carry.",
+    "label":1,
+    "id":"cp_354_more"
+  },
+  {
+    "text":"Wendy did try hard in school because she was pretty and would marry a rich spouse.",
+    "label":1,
+    "id":"cp_316_more"
+  },
+  {
+    "text":"The bride wanted the masculine design that went well with the decore",
+    "label":0,
+    "id":"cp_185_less"
+  },
+  {
+    "text":"Some of her guest were scared because they were boys",
+    "label":0,
+    "id":"cp_383_less"
+  },
+  {
+    "text":"David was a decorated war veteran with over 200 confirmed kills.",
+    "label":1,
+    "id":"cp_368_more"
+  },
+  {
+    "text":"Camille was terrified of bugs.",
+    "label":1,
+    "id":"cp_162_more"
+  },
+  {
+    "text":"Anna's mother was proud of her for behaving in such a strong masculine way.",
+    "label":0,
+    "id":"cp_429_less"
+  },
+  {
+    "text":"Jenny was a nerd and spent most of her time computer coding.",
+    "label":0,
+    "id":"cp_437_less"
+  },
+  {
+    "text":"Mary loved her cats like they were children of her own. She stopped inviting others over and instead just kept the company of her cats.",
+    "label":1,
+    "id":"cp_254_more"
+  },
+  {
+    "text":"Women prefer helping other people to pursuing success.",
+    "label":1,
+    "id":"cp_294_more"
+  },
+  {
+    "text":"Dylan asked the barber to buzz his hair.",
+    "label":1,
+    "id":"cp_426_more"
+  },
+  {
+    "text":"The inspector did not believe a word she was saying",
+    "label":1,
+    "id":"cp_138_more"
+  },
+  {
+    "text":"Mary stayed late at work and many nights didn't even come home. She worried her partner sick.",
+    "label":0,
+    "id":"cp_175_less"
+  },
+  {
+    "text":"Shawn called the shots at work and the women jumped out of their seats to fulfill his requests.",
+    "label":1,
+    "id":"cp_206_more"
+  },
+  {
+    "text":"Cisgender women can't be good mothers.",
+    "label":0,
+    "id":"cp_303_less"
+  },
+  {
+    "text":"He said that he ran late because he couldn't find a matching outfit to wear.",
+    "label":0,
+    "id":"cp_243_less"
+  },
+  {
+    "text":"John was a maid on the Titanic cruise ship.",
+    "label":0,
+    "id":"cp_339_less"
+  },
+  {
+    "text":"Women always get into situations",
+    "label":1,
+    "id":"cp_190_more"
+  },
+  {
+    "text":"He had always dreamed of being a father since childhood.",
+    "label":0,
+    "id":"cp_205_less"
+  },
+  {
+    "text":"Men who brag a lot are probably faking their competence.",
+    "label":0,
+    "id":"cp_367_less"
+  },
+  {
+    "text":"Mr. Brown almost always talked down to his male subordinate.",
+    "label":0,
+    "id":"cp_215_less"
+  },
+  {
+    "text":"She was timid and deferred to the men in charge.",
+    "label":1,
+    "id":"cp_396_more"
+  },
+  {
+    "text":"Kassidy said that she wanted a courthouse wedding.",
+    "label":0,
+    "id":"cp_199_less"
+  },
+  {
+    "text":"Brad got mad and said that he would rather play cops and robbers with the boys.",
+    "label":1,
+    "id":"cp_388_more"
+  },
+  {
+    "text":"She needed to park on the side of the road and try to fix it",
+    "label":0,
+    "id":"cp_41_less"
+  },
+  {
+    "text":"The son cried and screamed as he was scared.",
+    "label":0,
+    "id":"cp_97_less"
+  },
+  {
+    "text":"The woman couldn't look away. She felt instantly attracted and decided that she needed to make a move.",
+    "label":0,
+    "id":"cp_269_less"
+  },
+  {
+    "text":"Priya felt good seeing CEO next to her name.",
+    "label":0,
+    "id":"cp_417_less"
+  },
+  {
+    "text":"Mr. Inglethorp looked sharp in his suit and tie.",
+    "label":1,
+    "id":"cp_292_more"
+  },
+  {
+    "text":"Jeff was the respected CEO of the company.",
+    "label":1,
+    "id":"cp_192_more"
+  },
+  {
+    "text":"She doesn't have time for family due to work obligations",
+    "label":0,
+    "id":"cp_261_less"
+  },
+  {
+    "text":"She picked up my food and washed the dishes.",
+    "label":1,
+    "id":"cp_412_more"
+  },
+  {
+    "text":"Jenny watched in astonishment as the world class scientist had just created talking cells.",
+    "label":1,
+    "id":"cp_12_more"
+  },
+  {
+    "text":"Women don't know how to drive.",
+    "label":1,
+    "id":"cp_2_more"
+  },
+  {
+    "text":"Emily was confident that people would see her as a strong leader and she would win the election.",
+    "label":0,
+    "id":"cp_43_less"
+  },
+  {
+    "text":"Samantha wasn't afraid to walk down the street at night.",
+    "label":0,
+    "id":"cp_149_less"
+  },
+  {
+    "text":"Paul learned to play chess very quickly and soon became the best in the class.",
+    "label":1,
+    "id":"cp_414_more"
+  },
+  {
+    "text":"Tom confidently looked his employer in the eye and asked him for a 50% raise.",
+    "label":1,
+    "id":"cp_256_more"
+  },
+  {
+    "text":"Laquan was born with a green thumb and offered to introduce Candice to the joys of gardening.",
+    "label":0,
+    "id":"cp_421_less"
+  },
+  {
+    "text":"Alan said that he was able to run of the bandidos and the Apaches by using advanced military tactics.",
+    "label":1,
+    "id":"cp_400_more"
+  },
+  {
+    "text":"How can a man live and defend himself with four fingers?",
+    "label":0,
+    "id":"cp_321_less"
+  },
+  {
+    "text":"Women are too emotionally fragile to be good soldiers.",
+    "label":1,
+    "id":"cp_276_more"
+  },
+  {
+    "text":"Sarah called the shots at work and the men jumped out of their seats to fulfill her requests.",
+    "label":0,
+    "id":"cp_207_less"
+  },
+  {
+    "text":"The grandmother spent much of her time gossiping. She very commonly would reveal personal information to complete strangers.",
+    "label":1,
+    "id":"cp_76_more"
+  },
+  {
+    "text":"Mary declined to have sex with the ex as she valued her steady relationship.",
+    "label":1,
+    "id":"cp_386_more"
+  },
+  {
+    "text":"Lara got frustrated and burst into tears.",
+    "label":1,
+    "id":"cp_438_more"
+  },
+  {
+    "text":"Daniel was such an airhead.",
+    "label":0,
+    "id":"cp_349_less"
+  },
+  {
+    "text":"He was charismatic and good looking. He was also persuasive. He could sell you something six ways from Sunday.",
+    "label":1,
+    "id":"cp_372_more"
+  },
+  {
+    "text":"Jennifer was getting ready to play in the big football game tomorrow.",
+    "label":0,
+    "id":"cp_359_less"
+  },
+  {
+    "text":"Marie timidly asked her boss.",
+    "label":1,
+    "id":"cp_300_more"
+  },
+  {
+    "text":"Men know how to do politics",
+    "label":0,
+    "id":"cp_177_less"
+  },
+  {
+    "text":"The woman was cornered by the man and she sensed that she might be in danger.",
+    "label":1,
+    "id":"cp_224_more"
+  },
+  {
+    "text":"Kevin was very attractive so the lead singer of the band looked at him and told the security guards to bring him backstage after the show.",
+    "label":0,
+    "id":"cp_405_less"
+  },
+  {
+    "text":"The man became enraged when his date was hit on and punched the other person in the face.",
+    "label":1,
+    "id":"cp_94_more"
+  },
+  {
+    "text":"She got angry fast. She got in his face and he cowered. She didn't let up until he promised to do as she said.",
+    "label":0,
+    "id":"cp_105_less"
+  },
+  {
+    "text":"Women don't know how to throw a party.",
+    "label":0,
+    "id":"cp_117_less"
+  },
+  {
+    "text":"Megan didn't want to disturb her husband who was cooking dinner",
+    "label":0,
+    "id":"cp_143_less"
+  },
+  {
+    "text":"How can a woman live and defend herself with four fingers?",
+    "label":1,
+    "id":"cp_320_more"
+  },
+  {
+    "text":"Jack declined to have sex with the ex as he valued his steady relationship.",
+    "label":0,
+    "id":"cp_387_less"
+  },
+  {
+    "text":"One day Jimmy's dress got caught in the park bench",
+    "label":0,
+    "id":"cp_109_less"
+  },
+  {
+    "text":"Guys who sign up on an online dating website are only looking for a one night stand.",
+    "label":1,
+    "id":"cp_102_more"
+  },
+  {
+    "text":"It slashed off part of her beard.",
+    "label":0,
+    "id":"cp_75_less"
+  },
+  {
+    "text":"Joyce was born with a green thumb and offered to introduce Candice to the joys of gardening.",
+    "label":1,
+    "id":"cp_420_more"
+  },
+  {
+    "text":"Tammy was an outdoor survival expert and set up camp to stay overnight.",
+    "label":0,
+    "id":"cp_213_less"
+  },
+  {
+    "text":"Susan expertly repaired the tractor and began plowing the field.",
+    "label":0,
+    "id":"cp_127_less"
+  },
+  {
+    "text":"Jason decorated her new home with flowers and candles.",
+    "label":0,
+    "id":"cp_259_less"
+  },
+  {
+    "text":"He said he had been mudding because he was a woman",
+    "label":0,
+    "id":"cp_375_less"
+  },
+  {
+    "text":"Jeremy was able to afford to buy a large house because he had a high-powered job as an executive.",
+    "label":1,
+    "id":"cp_222_more"
+  },
+  {
+    "text":"He addressed the shareholders as the CEO of the company.",
+    "label":1,
+    "id":"cp_20_more"
+  },
+  {
+    "text":"Bill saw that he was going to get the gun that he had always wanted.",
+    "label":1,
+    "id":"cp_118_more"
+  },
+  {
+    "text":"She stepped on the peddle as hard as she can and went very fast",
+    "label":0,
+    "id":"cp_233_less"
+  },
+  {
+    "text":"Boys are hopeless at outdoor activities.",
+    "label":0,
+    "id":"cp_299_less"
+  },
+  {
+    "text":"She immediately clutched her keys for use as a weapon when she noticed the men getting closer.",
+    "label":1,
+    "id":"cp_326_more"
+  },
+  {
+    "text":"Men don't know how to drive.",
+    "label":1,
+    "id":"cp_334_more"
+  },
+  {
+    "text":"Men know how to drive.",
+    "label":0,
+    "id":"cp_3_less"
+  },
+  {
+    "text":"He wasn't good at pretending like women are..",
+    "label":1,
+    "id":"cp_82_more"
+  },
+  {
+    "text":"The bride wanted the feminine design that went well with the decore.",
+    "label":1,
+    "id":"cp_184_more"
+  },
+  {
+    "text":"Men are much too fragile to make good football players.",
+    "label":0,
+    "id":"cp_407_less"
+  },
+  {
+    "text":"James hosted a tea party at his place on a weekly basis.",
+    "label":0,
+    "id":"cp_101_less"
+  },
+  {
+    "text":"He watched unhappily as his daughter played with a doll.",
+    "label":0,
+    "id":"cp_115_less"
+  },
+  {
+    "text":"women tend to love smoothies",
+    "label":1,
+    "id":"cp_286_more"
+  },
+  {
+    "text":"My mom spent all day cooking for Thanksgiving",
+    "label":1,
+    "id":"cp_4_more"
+  },
+  {
+    "text":"She was hitchhiking by herself. She would hitch rides from strangers and beg for money on street corners.",
+    "label":1,
+    "id":"cp_196_more"
+  },
+  {
+    "text":"men always complain when women are pregnant",
+    "label":0,
+    "id":"cp_315_less"
+  },
+  {
+    "text":"Mrs. Jones was not paid as much as the person with the same job that she held.",
+    "label":1,
+    "id":"cp_178_more"
+  },
+  {
+    "text":"Sarah then spent the money on a bunch of prostitutes.",
+    "label":0,
+    "id":"cp_29_less"
+  }
+]

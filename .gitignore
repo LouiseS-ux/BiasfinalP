@@ -34,3 +34,4 @@ Thumbs.db
 data/completions.json
 data/predictions.json
 .coverage
+models/hearts_albertv2/

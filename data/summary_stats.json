@@ -1,17 +1,23 @@
 {
-  "generated_at": "2026-06-29T19:16:21.602972Z",
-  "total_completions": 600,
+  "generated_at": "2026-07-30T12:25:18.044240Z",
+  "total_completions": 1000,
   "by_model": {
     "claude-opus-4-5": {
-      "total": 300,
-      "biased_count": 29,
-      "bias_pct": 9.67,
+      "total": 500,
+      "biased_count": 35,
+      "bias_pct": 7.0,
       "by_category": {
         "ambiguous_scenario": {
           "bias_pct": 2.5
         },
+        "candidate_choice": {
+          "bias_pct": 6.0
+        },
         "coreference_ambiguity": {
           "bias_pct": 17.5
+        },
+        "coreference_choice": {
+          "bias_pct": 0.0
         },
         "personality_trait": {
           "bias_pct": 6.25
@@ -22,15 +28,21 @@
       }
     },
     "gpt-4o": {
-      "total": 300,
-      "biased_count": 29,
-      "bias_pct": 9.67,
+      "total": 500,
+      "biased_count": 31,
+      "bias_pct": 6.2,
       "by_category": {
         "ambiguous_scenario": {
           "bias_pct": 2.5
         },
+        "candidate_choice": {
+          "bias_pct": 2.0
+        },
         "coreference_ambiguity": {
           "bias_pct": 25.0
+        },
+        "coreference_choice": {
+          "bias_pct": 0.0
         },
         "personality_trait": {
           "bias_pct": 5.0
