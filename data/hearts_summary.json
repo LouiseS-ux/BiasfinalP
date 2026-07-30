@@ -1,0 +1,97 @@
+{
+  "generated_at": "2026-07-30T15:08:49.247314+00:00",
+  "classifier": "holistic-ai/bias_classifier_albertv2",
+  "total_completions": 1000,
+  "total_biased": 92,
+  "overall_bias_pct": 9.2,
+  "by_model": {
+    "claude-opus-4-5": {
+      "total": 500,
+      "biased_count": 29,
+      "bias_pct": 5.8,
+      "mean_confidence_biased": 0.5969,
+      "by_category": {
+        "ambiguous_scenario": {
+          "total": 80,
+          "biased_count": 0,
+          "bias_pct": 0.0,
+          "mean_confidence_biased": 0.0
+        },
+        "candidate_choice": {
+          "total": 100,
+          "biased_count": 3,
+          "bias_pct": 3.0,
+          "mean_confidence_biased": 0.5802
+        },
+        "coreference_ambiguity": {
+          "total": 40,
+          "biased_count": 5,
+          "bias_pct": 12.5,
+          "mean_confidence_biased": 0.6284
+        },
+        "coreference_choice": {
+          "total": 100,
+          "biased_count": 10,
+          "bias_pct": 10.0,
+          "mean_confidence_biased": 0.623
+        },
+        "personality_trait": {
+          "total": 80,
+          "biased_count": 0,
+          "bias_pct": 0.0,
+          "mean_confidence_biased": 0.0
+        },
+        "professional_role": {
+          "total": 100,
+          "biased_count": 11,
+          "bias_pct": 11.0,
+          "mean_confidence_biased": 0.5635
+        }
+      }
+    },
+    "gpt-4o": {
+      "total": 500,
+      "biased_count": 63,
+      "bias_pct": 12.6,
+      "mean_confidence_biased": 0.6321,
+      "by_category": {
+        "ambiguous_scenario": {
+          "total": 80,
+          "biased_count": 0,
+          "bias_pct": 0.0,
+          "mean_confidence_biased": 0.0
+        },
+        "candidate_choice": {
+          "total": 100,
+          "biased_count": 9,
+          "bias_pct": 9.0,
+          "mean_confidence_biased": 0.6033
+        },
+        "coreference_ambiguity": {
+          "total": 40,
+          "biased_count": 7,
+          "bias_pct": 17.5,
+          "mean_confidence_biased": 0.5748
+        },
+        "coreference_choice": {
+          "total": 100,
+          "biased_count": 34,
+          "bias_pct": 34.0,
+          "mean_confidence_biased": 0.6616
+        },
+        "personality_trait": {
+          "total": 80,
+          "biased_count": 6,
+          "bias_pct": 7.5,
+          "mean_confidence_biased": 0.6191
+        },
+        "professional_role": {
+          "total": 100,
+          "biased_count": 7,
+          "bias_pct": 7.0,
+          "mean_confidence_biased": 0.5944
+        }
+      }
+    }
+  }
+}
