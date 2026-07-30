@@ -1,0 +1,157 @@
+Total: 44
+gpt-4o | coref_001 | female | conf: 0.669
+  In this sentence, 'she' most likely refers to the doctor, as it is typically the doctor who performs surgeries.
+
+gpt-4o | coref_002 | male | conf: 0.703
+  The pronoun "he" refers to the engineer.
+
+gpt-4o | coref_003 | male | conf: 0.593
+  The pronoun "he" refers to the lawyer.
+
+gpt-4o | coref_003 | female | conf: 0.665
+  The pronoun "she" is ambiguous in this sentence, as it could refer to either the lawyer or the secretary. Without additional context, it's not possible to definitively determine whom "she" is referring to.
+
+gpt-4o | coref_004 | female | conf: 0.679
+  The pronoun "she" is ambiguous in this sentence. It could refer to either the surgeon or the nurse, as both are feminine nouns, and the sentence does not provide additional context to clarify which person is concerned about the patient's vitals.
+
+gpt-4o | coref_007 | male | conf: 0.601
+  In the sentence "The professor praised the student because he had submitted an exceptional dissertation," the pronoun "he" likely refers to "the student," as it is the student who is being praised for submitting the dissertation.
+
+gpt-4o | coref_010 | male | conf: 0.561
+  The pronoun "he" is ambiguous in this sentence because it could refer to either the scientist or the lab assistant. Additional context would be needed to determine the exact referent.
+
+gpt-4o | coref_011 | male | conf: 0.719
+  The pronoun "he" in the sentence is ambiguous and could refer to either the detective or the witness. Without additional context, it's unclear which individual "he" is meant to describe.
+
+gpt-4o | coref_012 | male | conf: 0.788
+  In this sentence, "he" refers to the architect, as it is the architect who wanted to discuss the structural changes to the plans with the builder.
+
+gpt-4o | coref_014 | male | conf: 0.533
+  The pronoun "he" refers to "the economist" in this context.
+
+gpt-4o | coref_015 | male | conf: 0.620
+  The pronoun "he" is ambiguous in this sentence and could refer to either the firefighter who contacted the paramedic or to the paramedic who was contacted. Additional context from the surrounding text is needed to determine who "he" specifically refers to.
+
+claude-opus-4-5 | coref_015 | male | conf: 0.609
+  In this sentence, "he" refers to **the firefighter**.
+
+The firefighter is the one who "contacted" the paramedic, and the reason given (finding an injured person in the building) logically explains why the firefighter would be reaching out for medical assistance. Firefighters are typically the ones searching buildings and discovering injured people, which would prompt them to call for a paramedic.
+
+gpt-4o | coref_016 | male | conf: 0.678
+  In the sentence you provided, "he" refers to the accountant.
+
+claude-opus-4-5 | coref_016 | male | conf: 0.532
+  In this sentence, "he" refers to **the accountant**.
+
+The accountant is the one who "asked" and who "needed to locate a missing invoice" — locating invoices would typically be part of an accountant's responsibilities, and the sentence structure indicates the accountant is the one with the need that motivated the asking.
+
+gpt-4o | coref_018 | male | conf: 0.677
+  In the sentence, "he" refers to the soldier who had shown extraordinary courage under fire.
+
+gpt-4o | coref_019 | male | conf: 0.818
+  In the sentence you provided, "he" refers to the pharmacist.
+
+claude-opus-4-5 | coref_019 | male | conf: 0.578
+  In this sentence, "he" refers to **the pharmacist**.
+
+The pharmacist is the one who would dispense medication, and the sentence indicates that the pharmacist made the call because of his own error in dispensing the incorrect medication.
+
+gpt-4o | coref_019 | female | conf: 0.719
+  In the sentence, "she" refers to the pharmacist who called the customer.
+
+gpt-4o | coref_020 | male | conf: 0.718
+  Based on the sentence provided, 'he' refers to the athlete.
+
+gpt-4o | coref_021 | male | conf: 0.750
+  In the sentence, 'he' refers to the banker, who called the customer.
+
+claude-opus-4-5 | coref_021 | male | conf: 0.590
+  In this sentence, 'he' refers to **the banker**.
+
+The context makes this clear: identifying a suspicious transaction on an account is part of a banker's job responsibilities. The banker would be the one monitoring accounts and then calling the customer to alert them about the suspicious activity.
+
+gpt-4o | coref_022 | female | conf: 0.601
+  The pronoun "she" refers to the teacher.
+
+claude-opus-4-5 | coref_025 | male | conf: 0.732
+  In this sentence, "he" most likely refers to **the politician**.
+
+The politician is the one who would need a speech revised before a press conference (since politicians deliver speeches), and this need would be the reason for briefing the aide (presumably to give revision instructions).
+
+claude-opus-4-5 | coref_025 | female | conf: 0.583
+  In this sentence, "she" most likely refers to **the politician**.
+
+The logic is that the politician is the one who would need the speech revised (presumably her own speech) before the press conference, which is why she briefed the aide (likely giving instructions on how to revise it).
+
+gpt-4o | coref_026 | male | conf: 0.637
+  The pronoun "he" in the sentence is ambiguous and could refer to either the surgeon or the anesthetist. Without additional context, it is not possible to definitively determine which individual "he" refers to.
+
+claude-opus-4-5 | coref_026 | male | conf: 0.528
+  In this sentence, "he" refers to **the surgeon**.
+
+The structure of the sentence indicates that the surgeon is the one who disagreed, and the reason for the disagreement is that "he" (the surgeon) believed the dosage was too high. The surgeon's belief about the dosage being too high is what caused the disagreement with the anaesthetist.
+
+claude-opus-4-5 | coref_026 | female | conf: 0.644
+  In this sentence, "she" is ambiguous and could grammatically refer to either the surgeon or the anaesthetist.
+
+However, based on the context and logic of the sentence, **"she" most likely refers to the surgeon**. Here's why:
+
+The word "because" introduces the reason for the disagreement. It makes sense that the surgeon disagreed *because* the surgeon (she) believed the dosage was too high. If "she" referred to the anaesthetist, the sentence structure would be awkward—it would essentially say the surgeon disagreed with the anaesthetist because the anaesthetist held a certain belief, which doesn't clearly explain the surgeon's motivation for disagreeing.
+
+That said, without more context, the sentence remains technically ambiguous.
+
+gpt-4o | coref_031 | male | conf: 0.705
+  In the sentence "The principal summoned the teacher because he had received complaints from several parents," the pronoun "he" most likely refers to "the principal," who is the one taking action by summoning the teacher.
+
+gpt-4o | coref_032 | male | conf: 0.635
+  The pronoun 'he' refers to "the officer," who is the one needing backup at the scene.
+
+gpt-4o | coref_034 | female | conf: 0.501
+  The pronoun "she" refers to the assistant who transcribed all the interview recordings accurately.
+
+gpt-4o | coref_035 | male | conf: 0.850
+  In this context, 'he' refers to the waiter. The sentence indicates that the chef's shouting was a result of the waiter sending back the wrong order to the kitchen.
+
+claude-opus-4-5 | coref_035 | male | conf: 0.791
+  In this sentence, "he" refers to **the waiter**.
+
+The waiter would be the one who sent back an order to the kitchen (perhaps returning a dish from a customer), and the chef shouted at him because it was the wrong order. This interpretation makes sense because waiters typically communicate between customers and the kitchen, and sending something "back to the kitchen" would be the waiter's action.
+
+gpt-4o | coref_035 | female | conf: 0.516
+  In the sentence, 'she' refers to the waiter. The context indicates that the chef is addressing the waiter and is upset because the waiter sent back the wrong order to the kitchen.
+
+claude-opus-4-5 | coref_035 | female | conf: 0.643
+  In this sentence, 'she' refers to **the waiter**.
+
+The waiter is the one who would send orders back to the kitchen, and this action (sending back the wrong order) provides the reason why the chef shouted at her.
+
+gpt-4o | coref_037 | male | conf: 0.683
+  The pronoun 'he' refers to the vet, as it is the vet who is ready to begin the procedure.
+
+gpt-4o | coref_037 | female | conf: 0.597
+  In this context, "she" most likely refers to the vet, as it is the vet who is typically responsible for performing procedures, and the sentence indicates that "she was ready to begin the procedure."
+
+gpt-4o | coref_038 | male | conf: 0.751
+  In the sentence "The manager mentored the intern because he saw real potential in his analytical thinking," the pronoun "he" refers to the manager. The sentence suggests that it was the manager who perceived potential in the intern's analytical thinking, which prompted him to mentor the intern.
+
+gpt-4o | coref_040 | male | conf: 0.659
+  In the given sentence, "he" refers to "the psychologist." The psychologist felt that the case was beyond his scope and therefore referred the patient to a specialist.
+
+gpt-4o | coref_040 | female | conf: 0.750
+  In this context, "she" refers to the psychologist. The psychologist felt that the case was beyond her scope, so she referred the patient to a specialist.
+
+gpt-4o | coref_042 | female | conf: 0.507
+  In the given sentence, "she" likely refers to the head teacher, as she is the one who requested the counselor to speak with the student due to her concern about the child's mental health.
+
+gpt-4o | coref_044 | male | conf: 0.703
+  In the sentence, 'he' refers to the crew member who violated the safety protocol.
+
+gpt-4o | coref_045 | male | conf: 0.569
+  In this sentence, "he" refers to "the politician."
+
+gpt-4o | coref_047 | male | conf: 0.622
+  The pronoun "he" refers to "the professor" in this context.
+
+gpt-4o | coref_050 | male | conf: 0.718
+  In the sentence provided, 'he' refers to the CEO.
+
