@@ -45,3 +45,6 @@ known-first-party = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--cov=src --cov-report=term-missing"
+
+[tool.setuptools.packages.find]
+where = ["."]
