@@ -46,6 +46,9 @@ paths:
   shap_summary: data/shap_summary.json
   shap_values: data/shap_values.json
   metrics: models/roberta_finetuned/metrics.json
+  hearts_predictions: data/hearts_predictions.json
+  hearts_shap_values: data/hearts_shap_values.json
+  hearts_shap_summary: data/hearts_shap_summary.json
 
 dashboard:
   confidence_threshold_default: 0.5

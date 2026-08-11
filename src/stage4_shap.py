@@ -1,9 +1,9 @@
 """Stage 4 — SHAP explainer.
 
-Loads the fine-tuned RoBERTa classifier and computes token-level SHAP attribution
-scores for all 600 completions. Writes data/shap_values.json incrementally and
-runs six post-hoc evaluation checks on the classifier's behaviour.
-Results are saved to data/shap_summary.json.
+Loads the HEARTS ALBERT-v2 classifier and computes token-level SHAP attribution
+scores for all 1000 completions. Writes data/hearts_shap_values.json incrementally
+and runs six post-hoc evaluation checks on the classifier's behaviour.
+Results are saved to data/hearts_shap_summary.json.
 """
 
 from __future__ import annotations
@@ -25,6 +25,9 @@ import yaml
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 logger = logging.getLogger(__name__)
+
+HEARTS_MODEL = "holistic-ai/bias_classifier_albertv2"
+HEARTS_CACHE_DIR = "models/hearts_albertv2/"
 
 # Gendered pronouns used in pronoun masking ablation (check 2)
 _PRONOUNS = {
@@ -49,13 +52,16 @@ def _load_config() -> dict[str, Any]:
         return yaml.safe_load(f)
 
 
-def _load_model_and_tokenizer(
-    output_dir: str,
-) -> tuple[AutoModelForSequenceClassification, AutoTokenizer]:
-    """Load the fine-tuned classifier and tokenizer from the checkpoint directory."""
-    tokenizer = AutoTokenizer.from_pretrained(output_dir)
-    model = AutoModelForSequenceClassification.from_pretrained(output_dir)
+def _load_model_and_tokenizer() -> (
+    tuple[AutoModelForSequenceClassification, AutoTokenizer]
+):
+    """Load the HEARTS ALBERT-v2 classifier and tokenizer from HuggingFace cache."""
+    tokenizer = AutoTokenizer.from_pretrained(HEARTS_MODEL, cache_dir=HEARTS_CACHE_DIR)
+    model = AutoModelForSequenceClassification.from_pretrained(
+        HEARTS_MODEL, cache_dir=HEARTS_CACHE_DIR
+    )
     model.eval()
+    logger.info("HEARTS ALBERT-v2 loaded from %s", HEARTS_CACHE_DIR)
     return model, tokenizer
 
 
@@ -93,7 +99,7 @@ def _keep_alive(interval_seconds: int = 1200) -> None:
 def _load_existing_shap(
     shap_path: str,
 ) -> tuple[list[dict[str, Any]], set[tuple[str, str, str]]]:
-    """Load existing shap_values.json, return records and set of completed keys."""
+    """Load existing shap values file, return records and set of completed keys."""
     path = Path(shap_path)
     if not path.exists():
         return [], set()
@@ -299,8 +305,9 @@ def _write_shap_summary(
     total_completions: int,
     max_evals: int,
 ) -> None:
-    """Write all six check results to shap_summary.json."""
+    """Write all six check results to hearts_shap_summary.json."""
     summary = {
+        "classifier": HEARTS_MODEL,
         "total_completions": total_completions,
         "max_evals": max_evals,
         "checks": check_results,
@@ -311,21 +318,20 @@ def _write_shap_summary(
 
 
 def run_shap(config: dict[str, Any]) -> None:
-    """Run SHAP on all completions incrementally and write shap_values.json."""
+    """Run SHAP on all completions incrementally and write hearts_shap_values.json."""
     paths = config["paths"]
     clf = config["classifier"]
     max_length: int = clf["max_seq_length"]
-    output_dir: str = clf["output_dir"]
     max_evals: int = clf.get("shap_max_evals", 200)
 
     keepalive = threading.Thread(target=_keep_alive, daemon=True)
     keepalive.start()
 
-    model, tokenizer = _load_model_and_tokenizer(output_dir)
+    model, tokenizer = _load_model_and_tokenizer()
     predict_fn = _make_predict_fn(model, tokenizer, max_length)
     explainer = shap.Explainer(predict_fn, tokenizer)
 
-    with open(paths["completions"]) as f:
+    with open(paths["hearts_predictions"]) as f:
         completions = json.load(f)
 
     with open(paths["probe_bank"]) as f:
@@ -334,8 +340,9 @@ def run_shap(config: dict[str, Any]) -> None:
     for record in completions:
         record["category"] = categories.get(record["probe_id"], "unknown")
 
-    Path(paths["shap_values"]).parent.mkdir(parents=True, exist_ok=True)
-    shap_records, completed = _load_existing_shap(paths["shap_values"])
+    shap_path = paths["hearts_shap_values"]
+    Path(shap_path).parent.mkdir(parents=True, exist_ok=True)
+    shap_records, completed = _load_existing_shap(shap_path)
 
     remaining = [
         r
@@ -365,11 +372,11 @@ def run_shap(config: dict[str, Any]) -> None:
             "tokens": tokens,
             "shap": [round(v, 6) for v in values],
         }
-        _append_shap_record(paths["shap_values"], shap_records, new_record)
+        _append_shap_record(shap_path, shap_records, new_record)
         if (i + 1) % 10 == 0:
             logger.info("Progress: %d/%d completions processed", i + 1, len(remaining))
 
-    logger.info("SHAP values written to %s", paths["shap_values"])
+    logger.info("SHAP values written to %s", shap_path)
     logger.info("Running post-hoc evaluation checks...")
 
     check_results = {
@@ -384,7 +391,7 @@ def run_shap(config: dict[str, Any]) -> None:
     }
 
     _write_shap_summary(
-        paths["shap_summary"],
+        paths["hearts_shap_summary"],
         check_results,
         total_completions=len(completions),
         max_evals=max_evals,

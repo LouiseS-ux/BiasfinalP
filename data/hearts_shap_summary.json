@@ -1,0 +1,77 @@
+{
+  "classifier": "holistic-ai/bias_classifier_albertv2",
+  "total_completions": 1000,
+  "max_evals": 200,
+  "checks": {
+    "check1_pronoun_mass": {
+      "avg_pronoun_attribution_pct": 2.96
+    },
+    "check2_pronoun_masking": {
+      "flipped": 35,
+      "total": 1000,
+      "flip_pct": 3.5
+    },
+    "check3_paired_shap": {
+      "asymmetric_pairs": 250,
+      "total_pairs": 250
+    },
+    "check4_nonpronoun_tokens": {
+      "top_nonpronoun_tokens": [
+        {
+          "token": "accurately",
+          "mean_shap": 1.7107
+        },
+        {
+          "token": "flying",
+          "mean_shap": 1.634
+        },
+        {
+          "token": "warned",
+          "mean_shap": 1.3842
+        },
+        {
+          "token": "summon",
+          "mean_shap": 1.0176
+        },
+        {
+          "token": "intervene",
+          "mean_shap": 1.0076
+        },
+        {
+          "token": "proudly",
+          "mean_shap": 0.926
+        },
+        {
+          "token": "il",
+          "mean_shap": 0.905
+        },
+        {
+          "token": "coverage",
+          "mean_shap": 0.8958
+        },
+        {
+          "token": "Without",
+          "mean_shap": 0.8845
+        },
+        {
+          "token": "counsellor",
+          "mean_shap": 0.8812
+        }
+      ]
+    },
+    "check5_model_comparison": {
+      "shared_probes": 1,
+      "divergent_probes": 249
+    },
+    "check6_category_attribution": {
+      "by_category": {
+        "ambiguous_scenario": 5.3432,
+        "candidate_choice": 5.6512,
+        "coreference_ambiguity": 4.8321,
+        "coreference_choice": 5.9242,
+        "personality_trait": 5.3016,
+        "professional_role": 4.9577
+      }
+    }
+  }
+}
