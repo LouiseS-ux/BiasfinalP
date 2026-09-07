@@ -12,7 +12,8 @@ import logging
 # Goes into each stage file, imports its main function, and gives it clear local name
 from src.stage1_probe_bank import main as run_stage1
 from src.stage2_query_llm import main as run_stage2
-from src.stage3_classifier import main as run_stage3
+from src.stage3_hearts import main as run_stage3_hearts
+from src.stage3b_divergence import main as run_stage3b_divergence
 from src.stage4_shap import main as run_stage4
 
 # creates info logger for this file and adds this files name
@@ -36,7 +37,10 @@ def main() -> None:
     run_stage2()
 
     logger.info("Stage 3: Running classifier...")
-    run_stage3()
+    run_stage3_hearts()
+
+    logger.info("Stage 3b: Running candidate choice divergence scoring...")
+    run_stage3b_divergence()
 
     logger.info("Stage 4: Running SHAP explainability...")
     run_stage4()

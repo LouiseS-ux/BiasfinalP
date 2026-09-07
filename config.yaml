@@ -27,7 +27,7 @@ classifier:
   eval_strategy: epoch
   warmup_steps: 50
   shap_max_evals: 200
-  
+
 
 api:
   call_delay_seconds: 0.5
@@ -37,7 +37,7 @@ api:
     anthropic: claude-opus-4-5
 
 paths:
-  
+
   raw_data: data/raw/
   probe_bank: data/probe_bank.json
   completions: data/completions.json
@@ -49,6 +49,8 @@ paths:
   hearts_predictions: data/hearts_predictions.json
   hearts_shap_values: data/hearts_shap_values.json
   hearts_shap_summary: data/hearts_shap_summary.json
+  hearts_summary: data/hearts_summary.json
+  hearts_divergence: data/hearts_divergence_results.txt
 
 dashboard:
-  confidence_threshold_default: 0.5
+  default_view: flagged   # "flagged" or "all" — which probe set the Tab 2 selector opens with
