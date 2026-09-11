@@ -307,7 +307,7 @@ def _metric_tile_html(
         f'letter-spacing:0.05em;color:#f0f4ff;margin-bottom:4px;">{metric_name}</div>'
         '<div style="font-size:1rem;font-weight:600;color:#b8c8e8;'
         f'margin-bottom:14px;">{model_name}</div>'
-        f'<div style="font-size:3.4rem;font-weight:800;color:{text_color};'
+        f'<div style="font-size:2.6rem;font-weight:800;color:{text_color};'
         f'line-height:1;">{value}</div>'
         "</div>"
     )
@@ -339,6 +339,7 @@ def render_overview_tab(summary: HeartsSummary, divergence: DivergenceSummary) -
     models = list(summary.by_model.keys())
 
     def _bias_tile_html(model_name: str) -> str:
+        """Build the Bias Score tile HTML for one model."""
         model_summary = summary.by_model[model_name]
         return _metric_tile_html(
             "Bias Score",
@@ -349,6 +350,7 @@ def render_overview_tab(summary: HeartsSummary, divergence: DivergenceSummary) -
         )
 
     def _divergence_tile_html(model_name: str) -> str:
+        """Build the Divergence tile HTML for one model."""
         model_summary = summary.by_model[model_name]
         pairs_per_model = model_summary.total / 2
         divergence_pct = round(
@@ -803,13 +805,17 @@ def main() -> None:
         "<style>"
         '[data-testid="stHeader"]{height:3rem;}'
         ".block-container{padding-top:3.6rem;padding-bottom:1rem;}"
-        '[data-testid="stTabs"] button p{font-size:1rem;font-weight:700;'
+        '[data-testid="stTabs"] button p,'
+        'button[data-baseweb="tab"] p{font-size:1.3rem;font-weight:700;'
         "color:#E24B4A;text-transform:uppercase;letter-spacing:0.05em;}"
-        '[data-testid="stTabs"] button{'
-        "border:2px solid #6382a8;border-radius:5px;"
-        "padding:10px 24px;margin-right:8px;background:#394f6f;}"
-        '[data-testid="stTabs"] button[aria-selected="true"]{'
-        "border-color:#E24B4A;background:rgba(226,75,74,0.18);}"
+        '[data-testid="stTabs"] button,'
+        'button[data-baseweb="tab"]{'
+        "border:2px solid #6382a8 !important;border-radius:5px;"
+        "padding:10px 24px;margin-right:8px;background:#394f6f !important;}"
+        '[data-testid="stTabs"] button[aria-selected="true"],'
+        'button[data-baseweb="tab"][aria-selected="true"]{'
+        "border-color:#E24B4A !important;"
+        "background:rgba(226,75,74,0.18) !important;}"
         '[data-testid="stTabs"] div[data-baseweb="tab-highlight"]{display:none;}'
         '[class*="st-key-panel-"]{'
         "background:#394f6f;border:1.5px solid #6382a8;border-radius:6px;"

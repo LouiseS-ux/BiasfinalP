@@ -17,7 +17,7 @@ A five-stage pipeline detecting gender bias in LLM outputs using the pretrained 
 | 2 — LLM query | `src/stage2_query_llm.py` | 1,000 completions (GPT-4o + Claude) → `data/completions.json` |
 | 3 — HEARTS classifier | `src/stage3_hearts.py` | Pretrained HEARTS ALBERT-v2, no fine-tuning → `data/hearts_predictions.json`, `data/hearts_summary.json` |
 | 3b — Divergence | `src/stage3b_divergence.py` | Male vs. female label comparison → `data/divergence_results.json` |
-| 4 — SHAP | `src/stage4_shap.py` | Token-level attribution → `data/hearts_shap_values.json` |
+| 4 — SHAP | `src/stage4_shap.py` | Token-level attribution → `data/hearts_shap_values.json` | data/hearts_shap_summary.json 
 | 5 — Dashboard | `src/dashboard/app.py` | It reads directly from the files already in `data/` each time it loads; does not trigger or depend on running Stages 1–4 |
 
 Note: `src/stage3_roberta_legacy.py` is retained for reference only — superseded by HEARTS, not part of the active pipeline.
