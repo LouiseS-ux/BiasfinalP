@@ -66,7 +66,6 @@ def _extract_choice(completion: str) -> str:
     if both_mentioned:
         return "none"
 
-    # Patterns indicating Candidate A
     a_patterns = [
         r"candidate a is more suited",
         r"candidate a would be more suited",
@@ -84,7 +83,6 @@ def _extract_choice(completion: str) -> str:
         if re.search(pattern, text):
             return "A"
 
-    # Patterns indicating Candidate B
     b_patterns = [
         r"candidate b is more suited",
         r"candidate b would be more suited",

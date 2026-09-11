@@ -2,8 +2,7 @@
 Stage 5 — Streamlit Dashboard.
 
 Read-only browser interface. Loads from data/*.json + hearts_divergence_results.txt
-only. No database, no writes. All charts use Plotly. Uses st.cache_data on all
-file loads.
+only. Uses st.cache_data on all file loads.
 
 Two tabs:
   1. Overview            — bias % and gender divergence per model, by category
@@ -28,10 +27,6 @@ from pydantic import BaseModel
 logger = logging.getLogger(__name__)
 
 CONFIG_PATH = Path("config.yaml")
-
-# ---------------------------------------------------------------------------
-# Data models — match the real pipeline output schemas exactly.
-# ---------------------------------------------------------------------------
 
 
 class Prediction(BaseModel):
@@ -124,16 +119,13 @@ class DivergenceSummary(BaseModel):
     pairs: list[DivergentPair]
 
 
-# ---------------------------------------------------------------------------
-# Data loading — all reads are cached and read-only, per coding_standards.md.
-# ---------------------------------------------------------------------------
-
-
 @st.cache_data
 def load_config() -> dict:
     """Load pipeline configuration from config.yaml."""
     with open(CONFIG_PATH) as f:
-        return yaml.safe_load(f)
+        config = yaml.safe_load(f)
+    logger.info("Config loaded from %s", CONFIG_PATH)
+    return config
 
 
 @st.cache_data
@@ -141,7 +133,9 @@ def load_predictions(path: str) -> list[Prediction]:
     """Load and validate hearts_predictions.json."""
     with open(path) as f:
         raw = json.load(f)
-    return [Prediction(**row) for row in raw]
+    predictions = [Prediction(**row) for row in raw]
+    logger.info("Loaded %d predictions from %s", len(predictions), path)
+    return predictions
 
 
 @st.cache_data
@@ -149,7 +143,9 @@ def load_shap_values(path: str) -> list[ShapRecord]:
     """Load and validate hearts_shap_values.json."""
     with open(path) as f:
         raw = json.load(f)
-    return [ShapRecord(**row) for row in raw]
+    shap_records = [ShapRecord(**row) for row in raw]
+    logger.info("Loaded %d SHAP records from %s", len(shap_records), path)
+    return shap_records
 
 
 @st.cache_data
@@ -157,7 +153,9 @@ def load_probe_bank(path: str) -> list[Probe]:
     """Load and validate probe_bank.json."""
     with open(path) as f:
         raw = json.load(f)
-    return [Probe(**row) for row in raw]
+    probes = [Probe(**row) for row in raw]
+    logger.info("Loaded %d probes from %s", len(probes), path)
+    return probes
 
 
 @st.cache_data
@@ -165,7 +163,9 @@ def load_summary(path: str) -> HeartsSummary:
     """Load and validate hearts_summary.json."""
     with open(path) as f:
         raw = json.load(f)
-    return HeartsSummary(**raw)
+    summary = HeartsSummary(**raw)
+    logger.info("Loaded HEARTS summary from %s", path)
+    return summary
 
 
 _PAIR_LINE = re.compile(
@@ -257,14 +257,10 @@ def load_divergence(path: str) -> DivergenceSummary:
 
     header = _parse_divergence_header(lines)
     pairs = _parse_divergence_pairs(lines[5:])
+    logger.info("Loaded %d divergence pairs from %s", len(pairs), path)
     return DivergenceSummary(**header, pairs=pairs)
 
 
-# ---------------------------------------------------------------------------
-# Tab 1 — overview (bias score + divergence, merged)
-# ---------------------------------------------------------------------------
-
-# Plain-English explanations shown as tooltips on the metric tiles.
 _TILE_TOOLTIPS = {
     "bias score": (
         "Share of this model's responses flagged by the classifier as "
@@ -285,18 +281,34 @@ def _tooltip_for(label: str) -> str:
     return ""
 
 
-def _metric_tile_html(label: str, value: str, accent: str) -> str:
-    """Build a single shaded, accent-colored metric tile (Overview tab)."""
-    tooltip = _tooltip_for(label)
+def _metric_tile_html(
+    metric_name: str,
+    model_name: str,
+    value: str,
+    border_color: str,
+    text_color: str | None = None,
+) -> str:
+    """Build a single shaded metric tile (Overview tab).
+
+    border_color sets the top accent stripe; text_color sets the numeric
+    value colour and defaults to border_color when not given separately.
+    """
+    text_color = text_color or border_color
+    tooltip = _tooltip_for(metric_name)
     title_attr = f' title="{tooltip}"' if tooltip else ""
     return (
-        f'<div{title_attr} style="background:rgba(130,130,150,0.14);border-radius:4px;'
-        "padding:14px 16px;box-shadow:0 2px 6px rgba(0,0,0,0.12);"
-        f'border-top:4px solid {accent};height:100%;cursor:help;">'
-        '<div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;'
-        f'letter-spacing:0.04em;opacity:0.75;margin-bottom:8px;">{label}</div>'
-        f'<div style="font-size:1.7rem;font-weight:700;color:{accent};'
-        f'line-height:1.1;">{value}</div>'
+        f'<div{title_attr} style="background:#394f6f;border-radius:6px;'
+        "padding:28px 20px;box-shadow:0 4px 14px rgba(0,0,0,0.35);"
+        "border:1.5px solid #6382a8;min-height:240px;height:100%;"
+        "display:flex;flex-direction:column;align-items:center;"
+        "justify-content:center;text-align:center;"
+        f'border-top:3px solid {border_color};cursor:help;">'
+        '<div style="font-size:1.3rem;font-weight:800;text-transform:uppercase;'
+        f'letter-spacing:0.05em;color:#f0f4ff;margin-bottom:4px;">{metric_name}</div>'
+        '<div style="font-size:1rem;font-weight:600;color:#b8c8e8;'
+        f'margin-bottom:14px;">{model_name}</div>'
+        f'<div style="font-size:3.4rem;font-weight:800;color:{text_color};'
+        f'line-height:1;">{value}</div>'
         "</div>"
     )
 
@@ -305,8 +317,8 @@ def render_overview_tab(summary: HeartsSummary, divergence: DivergenceSummary) -
     """Render the merged bias-score + divergence overview tab."""
     with st.container(border=True, key="panel-header"):
         st.markdown(
-            '<p style="font-size:1.15rem;font-weight:700;text-transform:uppercase;'
-            'letter-spacing:0.05em;opacity:0.85;margin:0 0 4px 0;">'
+            '<p style="font-size:1.3rem;font-weight:800;text-transform:uppercase;'
+            'letter-spacing:0.05em;opacity:0.85;margin:0 0 10px 0;">'
             "Gender Bias Detection Application</p>",
             unsafe_allow_html=True,
         )
@@ -315,51 +327,73 @@ def render_overview_tab(summary: HeartsSummary, divergence: DivergenceSummary) -
             "model produces the most gender bias, comparing Claude and ChatGPT "
             "models."
         )
+    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
     st.caption(
         f"{summary.total_completions} LLM text responses analysed to help identify "
         "which model produces more gender bias."
     )
 
-    bias_color = "#5DADE2"
-    divergence_color = "#FF5722"
+    bias_border_color = "#7AB8FF"
+    bias_text_color = "#E24B4A"
+    divergence_color = "#7AB8FF"
     models = list(summary.by_model.keys())
-    tiles = []
-    for model_name in models:
+
+    def _bias_tile_html(model_name: str) -> str:
         model_summary = summary.by_model[model_name]
+        return _metric_tile_html(
+            "Bias Score",
+            model_name,
+            f"{model_summary.bias_pct}%",
+            bias_border_color,
+            bias_text_color,
+        )
+
+    def _divergence_tile_html(model_name: str) -> str:
+        model_summary = summary.by_model[model_name]
+        pairs_per_model = model_summary.total / 2
         divergence_pct = round(
-            100 * divergence.by_model.get(model_name, 0) / model_summary.total, 1
+            100 * divergence.by_model.get(model_name, 0) / pairs_per_model, 1
         )
-        tiles.append(
-            (f"{model_name} — bias score", f"{model_summary.bias_pct}%", bias_color)
-        )
-        tiles.append(
-            (f"{model_name} — divergence", f"{divergence_pct}%", divergence_color)
+        return _metric_tile_html(
+            "Divergence", model_name, f"{divergence_pct}%", divergence_color
         )
 
-    cols = st.columns(len(tiles))
-    for col, (label, value, accent) in zip(cols, tiles, strict=True):
-        with col:
-            st.markdown(_metric_tile_html(label, value, accent), unsafe_allow_html=True)
+    col_metrics, col_chart = st.columns([2, 3])
 
-    # Spacer — gives the tiles room to breathe above the chart panel.
-    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+    model_a, model_b = models
+    with col_metrics:
+        row1a, row1b = st.columns(2, gap="small")
+        with row1a:
+            st.markdown(_bias_tile_html(model_a), unsafe_allow_html=True)
+        with row1b:
+            st.markdown(_bias_tile_html(model_b), unsafe_allow_html=True)
 
-    with st.container(border=True, key="panel-chart"):
+        st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
+
+        row2a, row2b = st.columns(2, gap="small")
+        with row2a:
+            st.markdown(_divergence_tile_html(model_a), unsafe_allow_html=True)
+        with row2b:
+            st.markdown(_divergence_tile_html(model_b), unsafe_allow_html=True)
+
+    with col_chart, st.container(border=True, key="panel-chart"):
         st.markdown("**Bias score by probe category**")
         categories = sorted(next(iter(summary.by_model.values())).by_category.keys())
         fig = go.Figure()
         for model_name in models:
             by_cat = summary.by_model[model_name].by_category
+            bar_values = [by_cat[c].bias_pct for c in categories]
             fig.add_trace(
                 go.Bar(
                     name=model_name,
                     x=categories,
-                    y=[by_cat[c].bias_pct for c in categories],
+                    y=bar_values,
+                    text=[f"{v}%" for v in bar_values],
+                    textposition="outside",
+                    textfont={"color": "#f0f4ff"},
                 )
             )
 
-        # Delta annotation — shows the gap between the two models' bias
-        # scores per category, directly above the taller of the two bars.
         if len(models) == 2:
             model_a, model_b = models
             for cat in categories:
@@ -369,64 +403,103 @@ def render_overview_tab(summary: HeartsSummary, divergence: DivergenceSummary) -
                 fig.add_annotation(
                     x=cat,
                     y=max(score_a, score_b) + 3,
-                    text=f"Δ {delta}",
+                    text=f"Models Delta: {delta}",
                     showarrow=False,
-                    font={"size": 11, "color": "gray"},
+                    font={"size": 11, "color": "#b8c8e8"},
                 )
 
         fig.update_layout(
             barmode="group",
             yaxis_title="Bias score (%)",
             legend_title_text="Model",
-            height=280,
+            height=460,
             margin={"t": 30, "l": 10, "r": 10, "b": 10},
+            plot_bgcolor="#394f6f",
+            paper_bgcolor="#394f6f",
+            font_color="#b8c8e8",
         )
+        fig.update_xaxes(gridcolor="#496a92", zerolinecolor="#496a92")
+        fig.update_yaxes(gridcolor="#496a92", zerolinecolor="#496a92")
         st.plotly_chart(fig, width="stretch")
 
-        # Plain-English explanation of each probe category, shown collapsed
-        # underneath the chart so the bar labels stay uncluttered.
         with st.expander("What do these categories mean?"):
             category_explanations = {
-                # TODO: fill in with your actual category keys from
-                # probe_bank.json and a one-line description of each.
-                # e.g. "hiring": "Prompts about recommending a job candidate.",
+                "professional_role": (
+                    "The occupation pair (surgeon, nurse). This format asks "
+                    "the LLM to produce evaluative language about a named "
+                    "individual, which is where implicit gender bias is "
+                    "likely surface in word choice and framing."
+                ),
+                "coreference_ambiguity": (
+                    "This format observes how the LLM continues a pronoun "
+                    "ambiguous sentence, and whether its continuation "
+                    "reflects a stereotypical assumption about which "
+                    "occupation the pronoun refers to."
+                ),
+                "personality_trait": (
+                    "The directive format mirrors real world LLM use and "
+                    "produces output that is directly comparable across "
+                    "the male and female employee variant of each probe, "
+                    "eliciting personality descriptive language."
+                ),
+                "candidate_choice": (
+                    "Question and answering style probes ask the LLM to "
+                    "make an explicit candidate choice (A/B), with "
+                    "justification. The justification the LLM provides "
+                    "reasoning and insight, which can include bias."
+                ),
+                "coreference_choice": (
+                    "Coreference resolution style probes ask the LLM to "
+                    "resolve a gendered pronoun (she/he)."
+                ),
+                "ambiguous_scenario": (
+                    "This tests whether the models free form text "
+                    "narrative choices; tone, assertiveness for each "
+                    "speaker, or outcome of the negotiation or situation "
+                    "differs by gender."
+                ),
             }
             for cat in categories:
                 explanation = category_explanations.get(
                     cat, "Description not yet added."
                 )
-                st.markdown(f"**{cat}** — {explanation}")
+                cat_label = cat.replace("_", " ").capitalize()
+                st.markdown(
+                    '<div style="margin-bottom:14px;">'
+                    '<span style="color:#ffffff;margin-right:8px;">&#9679;</span>'
+                    f"<strong>{cat_label}</strong> — {explanation}"
+                    "</div>",
+                    unsafe_allow_html=True,
+                )
 
         with st.expander("How is bias calculated?"):
             st.markdown(
-                "Each LLM completion is passed through the HEARTS ALBERT-v2 "
-                "classifier, which labels it as either **biased** or "
-                "**not biased**. The bias score shown above is the "
-                "percentage of a model's completions labelled biased out "
-                "of its total completions, per category or overall."
+                "Each LLM prompt response completion is passed through the "
+                "HEARTS ALBERT-v2 classifier, which labels it as either "
+                "biased/not biased. The bias score shown is the percentage "
+                "of a model's completions labelled biased out of its "
+                "total completions. The bias score per category is "
+                "displayed above each bar in the chart."
             )
 
         with st.expander("What is divergence and how is it calculated?"):
             st.markdown(
                 "Divergence measures whether a model's answer changes "
-                "depending only on the gender used in the prompt. For "
-                "matched male/female prompt pairs where the model made a "
-                "clear choice both times, a pair is **divergent** if the "
-                "male-prompt and female-prompt answers differ. The "
-                "divergence score is the percentage of such pairs that are "
-                "divergent, out of all pairs where a choice was made in "
-                "both versions."
+                "depending only on the gender used in the prompt. For each "
+                "probe, the HEARTS classifier's label (biased/not biased) "
+                "on the male prompt completion is compared against its "
+                "label on the female prompt completion. A pair is "
+                "divergent if the two labels differ. Divergence isolates "
+                "gender as the sole causal variable, evidencing that the "
+                "model's stereotype judgement changes depending on the "
+                "gender of the subject."
             )
 
 
-# ---------------------------------------------------------------------------
-# Tab 2 — SHAP explainability
-# ---------------------------------------------------------------------------
-
 _INTENSITY_COLORS = {
-    "high": ("#FF8A80", "#B71C1C"),
-    "moderate": ("#FFCC80", "#E65100"),
-    "low": ("#A5D6A7", "#1B5E20"),
+    "high": "#FF8A80",
+    "moderate": "#FFCC80",
+    "low": "#A5D6A7",
 }
 
 
@@ -464,11 +537,8 @@ def _highlight_tokens(
         if i not in band_by_index:
             html_parts.append(token)
             continue
-        bg, fg = _INTENSITY_COLORS[band_by_index[i]]
-        html_parts.append(
-            f'<span style="background:{bg};color:{fg};padding:1px 3px;'
-            f'border-radius:3px;">{token}</span>'
-        )
+        fg = _INTENSITY_COLORS[band_by_index[i]]
+        html_parts.append(f'<span style="color:{fg};font-weight:600;">{token}</span>')
     return "".join(html_parts)
 
 
@@ -493,15 +563,29 @@ def _top_attribution_tokens(
     return ranked[:top_n]
 
 
-def _section_label(text: str) -> None:
+def _section_label(text: str, margin_bottom: str = "8px") -> None:
     """Render a bold, oversized section label above a control."""
     st.markdown(
-        f'<p style="font-size:0.95rem;font-weight:600;margin:2px 0 0;">{text}</p>',
+        f'<p style="font-size:0.95rem;font-weight:600;margin:2px 0 {margin_bottom};">'
+        f"{text}</p>",
         unsafe_allow_html=True,
     )
 
 
 _WORD_CLOUD_COLORS = {"high": "#FF5252", "moderate": "#FFA726", "low": "#66BB6A"}
+
+_TOP_10_BIASED_PROBE_IDS = [
+    "qa_013",
+    "orig_030",
+    "coref_047",
+    "orig_032",
+    "orig_007",
+    "coref_002",
+    "coref_038",
+    "orig_037",
+    "coref_016",
+    "wb_031",
+]
 
 
 def _probe_bias_scores(predictions: list[Prediction]) -> dict[str, float]:
@@ -519,32 +603,34 @@ def _probe_bias_scores(predictions: list[Prediction]) -> dict[str, float]:
 
 def _resolve_active_probe_ids(
     view: str,
+    flagged_label: str,
     biased_probe_ids: set[str],
     shap_probe_ids: set[str],
-    bias_scores: dict[str, float],
 ) -> set[str]:
     """Return the probe ids in scope for the selected 'Choose prompt category' view."""
-    if view == "All Flagged Biased":
+    if view == flagged_label:
         return biased_probe_ids
-    if view == "Top 5 biased":
-        ranked = sorted(
-            biased_probe_ids & shap_probe_ids,
-            key=lambda pid: bias_scores.get(pid, 0.0),
-            reverse=True,
-        )
-        return set(ranked[:5])
+    if view == "Top 10 Biased":
+        return set(_TOP_10_BIASED_PROBE_IDS) & shap_probe_ids
     return shap_probe_ids
 
 
 def _render_word_cloud(shap_records: list[ShapRecord], active_ids: set[str]) -> None:
-    """Render the top-token word cloud panel for the given probe set, or a fallback."""
+    """Render the word cloud, then the colour key, inside one shared panel."""
     top_tokens = _top_attribution_tokens(shap_records, active_ids)
     if not top_tokens:
         st.info("No positive-attribution tokens found for this probe set.")
         return
 
     with st.container(border=True, key="panel-wordcloud"):
-        st.markdown("**Top tokens driving bias flags**")
+        st.markdown(
+            '<div style="display:flex;justify-content:space-between;'
+            'align-items:center;margin:0 0 18px;">'
+            '<span style="font-weight:700;">Top tokens driving bias flags</span>'
+            f"{_token_key_html()}"
+            "</div>",
+            unsafe_allow_html=True,
+        )
         scores = [score for _, score in top_tokens]
         lo, hi = min(scores), max(scores)
         span = hi - lo or 1.0
@@ -568,6 +654,31 @@ def _render_word_cloud(shap_records: list[ShapRecord], active_ids: set[str]) -> 
         )
 
 
+def _token_key_html() -> str:
+    """Build a compact colour-swatch key, styled like the bar chart's model legend."""
+    items = [
+        ("Most bias", _WORD_CLOUD_COLORS["high"]),
+        ("Medium", _WORD_CLOUD_COLORS["moderate"]),
+        ("Least", _WORD_CLOUD_COLORS["low"]),
+    ]
+    entries = "".join(
+        '<span style="display:inline-flex;align-items:center;gap:5px;'
+        'margin-left:18px;">'
+        f'<span style="width:12px;height:12px;border-radius:3px;'
+        f'background:{color};display:inline-block;"></span>'
+        f'<span style="font-size:0.78rem;color:#b8c8e8;">{label}</span>'
+        "</span>"
+        for label, color in items
+    )
+    return (
+        '<div style="display:flex;align-items:center;justify-content:flex-end;'
+        'flex-wrap:wrap;">'
+        '<span style="font-size:0.8rem;font-weight:700;">Key</span>'
+        f"{entries}"
+        "</div>"
+    )
+
+
 def render_shap_tab(
     predictions: list[Prediction],
     shap_records: list[ShapRecord],
@@ -577,31 +688,21 @@ def render_shap_tab(
     """Render the SHAP explainability tab: word cloud, view toggle, probe selector."""
     with st.container(border=True, key="panel-shap-header"):
         st.markdown(
-            '<p style="font-size:1.15rem;font-weight:700;text-transform:uppercase;'
-            'letter-spacing:0.05em;opacity:0.85;margin:0 0 4px 0;">'
+            '<p style="font-size:1.3rem;font-weight:800;text-transform:uppercase;'
+            'letter-spacing:0.05em;opacity:0.85;margin:0 0 10px 0;">'
             "SHAP Explainability</p>",
             unsafe_allow_html=True,
         )
         st.caption(
             "This tab shows which words in the AI LLMs text responses most "
             "influenced the bias detection. Words linked to gender stereotypes, "
-            "like describing a trait differently for men and women, are the "
+            "and describing a trait differently for men and women, are the "
             "strongest drivers of detected bias."
         )
-    legend_items = [
-        ("Green = least", _WORD_CLOUD_COLORS["low"]),
-        ("Orange = medium", _WORD_CLOUD_COLORS["moderate"]),
-        ("Red = most bias signal", _WORD_CLOUD_COLORS["high"]),
-    ]
-    legend_html = "&nbsp;&nbsp;&nbsp;".join(
-        f'<span style="color:{color};font-weight:600;">&#9679; {label}</span>'
-        for label, color in legend_items
-    )
-
+    st.markdown("<div style='margin-top:-20px'></div>", unsafe_allow_html=True)
     biased_probe_ids = {p.probe_id for p in predictions if p.label == "biased"}
-    # "All" means all probes with SHAP data available, not all probes in the
-    # probe bank — SHAP may only be computed for a subset (see coding_standards.md,
-    # stage4_shap.py: "limit initial runs to high-confidence predictions").
+    biased_completion_count = sum(1 for p in predictions if p.label == "biased")
+    flagged_label = f"All {biased_completion_count} Flagged Biased"
     shap_probe_ids = {r.probe_id for r in shap_records}
     bias_scores = _probe_bias_scores(predictions)
     all_model_options = sorted({r.model for r in shap_records})
@@ -610,14 +711,20 @@ def render_shap_tab(
 
     with col_model, st.container(border=True, key="panel-control-model"):
         _section_label("Choose model")
+        default_model_index = (
+            all_model_options.index("gpt-4o") if "gpt-4o" in all_model_options else 0
+        )
         selected_model = st.selectbox(
-            "Model", options=all_model_options, label_visibility="collapsed"
+            "Model",
+            options=all_model_options,
+            index=default_model_index,
+            label_visibility="collapsed",
         )
 
     with col_probeset, st.container(border=True, key="panel-control-probeset"):
         _section_label("Choose prompt category")
-        view_options = ["All Flagged Biased", "Top 5 biased", "All"]
-        view_index = {"flagged": 0, "all": 2}.get(default_view, 0)
+        view_options = [flagged_label, "Top 10 Biased", "All"]
+        view_index = {"flagged": 0, "top10": 1, "all": 2}.get(default_view, 0)
         view = st.radio(
             "Probe set",
             options=view_options,
@@ -627,14 +734,15 @@ def render_shap_tab(
         )
 
     active_ids = _resolve_active_probe_ids(
-        view, biased_probe_ids, shap_probe_ids, bias_scores
+        view, flagged_label, biased_probe_ids, shap_probe_ids
     )
 
-    # Most strongly biased probes first, so the viewer sees the clearest
-    # examples of bias without having to hunt through the list.
-    probe_options = sorted(
-        active_ids, key=lambda pid: bias_scores.get(pid, 0.0), reverse=True
-    )
+    if view == "Top 10 Biased":
+        probe_options = [pid for pid in _TOP_10_BIASED_PROBE_IDS if pid in active_ids]
+    else:
+        probe_options = sorted(
+            active_ids, key=lambda pid: bias_scores.get(pid, 0.0), reverse=True
+        )
 
     with col_probe, st.container(border=True, key="panel-control-probe"):
         _section_label("Choose prompt pair")
@@ -642,22 +750,20 @@ def render_shap_tab(
             st.warning("No probes available for this view.")
             selected_probe = None
         else:
+            default_probe_index = 0
+            if view == "Top 10 Biased" and "orig_007" in probe_options:
+                default_probe_index = probe_options.index("orig_007")
             selected_probe = st.selectbox(
                 "Choose a probe prompt pair for analysis",
                 options=probe_options,
+                index=default_probe_index,
                 label_visibility="collapsed",
             )
 
     if selected_probe is None:
         return
 
-    with st.container(border=True, key="panel-legend"):
-        st.caption(
-            "Tokens inside words driving bias - coloured in order of SHAP signal "
-            "amount."
-        )
-        st.markdown(legend_html, unsafe_allow_html=True)
-
+    st.markdown("<div style='margin-top:-16px'></div>", unsafe_allow_html=True)
     _render_word_cloud(shap_records, active_ids)
 
     probe = next((p for p in probe_bank if p.probe_id == selected_probe), None)
@@ -679,7 +785,9 @@ def render_shap_tab(
             None,
         )
         with col, st.container(border=True, key=f"panel-{gender}"):
-            _section_label(f"{gender.capitalize()} prompt response")
+            _section_label(
+                f"{gender.capitalize()} prompt response", margin_bottom="18px"
+            )
             if record is None:
                 st.write("No SHAP record found.")
                 continue
@@ -688,33 +796,35 @@ def render_shap_tab(
             )
 
 
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
-
-
 def main() -> None:
     """Streamlit app entry point."""
     st.set_page_config(page_title="Gender bias auditing dashboard", layout="wide")
     st.markdown(
         "<style>"
-        # Extra top padding stops the browser/Streamlit toolbar from
-        # overlapping the tab navigation buttons.
         '[data-testid="stHeader"]{height:3rem;}'
         ".block-container{padding-top:3.6rem;padding-bottom:1rem;}"
-        '[data-testid="stTabs"] button p{font-size:0.85rem;font-weight:600;'
-        "text-transform:uppercase;letter-spacing:0.05em;opacity:0.85;}"
+        '[data-testid="stTabs"] button p{font-size:1rem;font-weight:700;'
+        "color:#E24B4A;text-transform:uppercase;letter-spacing:0.05em;}"
         '[data-testid="stTabs"] button{'
-        # Square-ish corners (was 10px) to match the reference design.
-        "border:1.5px solid rgba(130,130,150,0.4);border-radius:4px;"
-        "padding:6px 18px;margin-right:8px;background:rgba(130,130,150,0.12);}"
+        "border:2px solid #6382a8;border-radius:5px;"
+        "padding:10px 24px;margin-right:8px;background:#394f6f;}"
         '[data-testid="stTabs"] button[aria-selected="true"]{'
-        "border-color:#FF5722;background:rgba(255,87,34,0.16);}"
+        "border-color:#E24B4A;background:rgba(226,75,74,0.18);}"
         '[data-testid="stTabs"] div[data-baseweb="tab-highlight"]{display:none;}'
         '[class*="st-key-panel-"]{'
-        "background:rgba(130,130,150,0.10);border-radius:8px;padding:1rem 1rem 0.6rem;"
-        "box-shadow:0 2px 6px rgba(0,0,0,0.10);}"
+        "background:#394f6f;border:1.5px solid #6382a8;border-radius:6px;"
+        "padding:1rem 1rem 0.6rem;box-shadow:0 4px 14px rgba(0,0,0,0.35);}"
+        '[class*="st-key-panel-header"]{padding:1.6rem 1.6rem 1.4rem;}'
+        '[class*="st-key-panel-shap-header"]{padding:1.6rem 1.6rem 1.4rem;}'
         '[data-testid="stVerticalBlock"]{gap:0.5rem;}'
+        '[class*="st-key-panel-control-"] > div{overflow:visible;}'
+        '[class*="st-key-panel-control-"] [data-testid="stRadio"] > div{'
+        "flex-wrap:wrap;row-gap:6px;column-gap:12px;}"
+        '[class*="st-key-panel-control-"] [data-testid="stSelectbox"],'
+        '[class*="st-key-panel-control-"] [data-testid="stRadio"]{'
+        "margin-top:8px;}"
+        '[data-testid="stExpander"]{'
+        "background:#394f6f;border:1.5px solid #6382a8;border-radius:6px;}"
         "</style>",
         unsafe_allow_html=True,
     )

@@ -1,19 +1,32 @@
+# roberta_legacy below is legacy, ignore. Active classifier used: HEARTS ALBERT-v2.
+# HEARTS model/settings load from HuggingFace. llms/api settings are OpenAI/Anthropic.
+# paths are local pipeline output files.
+
 llms:
   - gpt-4o
   - claude-opus-4-5
 
 probe_bank:
-  target_pairs: 150
+  target_pairs: 250
   sources:
-    - winobias        # professional roles and coreference ambiguity
-    - original        # personality descriptors and scenario-based
+    - winobias
+    - original
   categories:
-    - professional_role       # 50 pairs: WinoBias + original
-    - personality_trait       # 40 pairs: original only
-    - ambiguous_scenario      # 40 pairs: original only
-    - coreference_ambiguity   # 20 pairs: WinoBias only
+    - professional_role
+    - personality_trait
+    - ambiguous_scenario
+    - coreference_ambiguity
+    - candidate_choice
+    - coreference_choice
 
 classifier:
+  model_name: holistic-ai/bias_classifier_albertv2
+  cache_dir: models/hearts_albertv2/
+  max_seq_length: 256
+  shap_max_evals: 200
+  seed: 42
+
+roberta_legacy:
   training_data: stereoset
   model_name: roberta-base
   num_epochs: 6
@@ -26,8 +39,6 @@ classifier:
   weight_decay: 0.01
   eval_strategy: epoch
   warmup_steps: 50
-  shap_max_evals: 200
-
 
 api:
   call_delay_seconds: 0.5
@@ -37,7 +48,6 @@ api:
     anthropic: claude-opus-4-5
 
 paths:
-
   raw_data: data/raw/
   probe_bank: data/probe_bank.json
   completions: data/completions.json
@@ -45,12 +55,12 @@ paths:
   summary_stats: data/summary_stats.json
   shap_summary: data/shap_summary.json
   shap_values: data/shap_values.json
-  metrics: models/roberta_finetuned/metrics.json
   hearts_predictions: data/hearts_predictions.json
   hearts_shap_values: data/hearts_shap_values.json
   hearts_shap_summary: data/hearts_shap_summary.json
   hearts_summary: data/hearts_summary.json
   hearts_divergence: data/hearts_divergence_results.txt
+  roberta_metrics: models/roberta_finetuned/metrics.json
 
 dashboard:
-  default_view: flagged   # "flagged" or "all" — which probe set the Tab 2 selector opens with
+  default_view: top10

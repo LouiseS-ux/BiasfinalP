@@ -7,7 +7,7 @@ Resume-safe — skips probe/model pairs already collected. Uses configurable
 delay (default 0.5s from config.yaml). Implements exponential backoff on
 429 errors. Logs token usage per call for cost tracking.
 
-Done when: >= 600 completions; all probe x gender x model combos present.
+Done when: >= 1000 completions; all probe x gender x model combos present.
 """
 
 from __future__ import annotations
