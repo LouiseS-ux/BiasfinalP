@@ -5,7 +5,7 @@ A five-stage pipeline detecting gender bias in LLM outputs using the pretrained 
 
 
 
-**View Dashboard here:** *[add Streamlit link once deployed]*
+**View Dashboard here:** https://genderbiasdetector.streamlit.app/
 
 ---
 

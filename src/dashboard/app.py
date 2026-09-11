@@ -805,15 +805,16 @@ def main() -> None:
         "<style>"
         '[data-testid="stHeader"]{height:3rem;}'
         ".block-container{padding-top:3.6rem;padding-bottom:1rem;}"
-        '[data-testid="stTabs"] button p,'
-        'button[data-baseweb="tab"] p{font-size:1.3rem;font-weight:700;'
-        "color:#E24B4A;text-transform:uppercase;letter-spacing:0.05em;}"
-        '[data-testid="stTabs"] button,'
-        'button[data-baseweb="tab"]{'
-        "border:2px solid #6382a8 !important;border-radius:5px;"
-        "padding:10px 24px;margin-right:8px;background:#394f6f !important;}"
-        '[data-testid="stTabs"] button[aria-selected="true"],'
-        'button[data-baseweb="tab"][aria-selected="true"]{'
+        '[role="tab"]{'
+        "border:2px solid #6382a8 !important;border-radius:5px !important;"
+        "padding:10px 24px !important;margin-right:8px !important;"
+        "background:#394f6f !important;font-size:1.3rem !important;"
+        "font-weight:700 !important;color:#E24B4A !important;"
+        "text-transform:uppercase !important;letter-spacing:0.05em !important;}"
+        '[role="tab"] p,[role="tab"] div,[role="tab"] span{'
+        "font-size:1.3rem !important;font-weight:700 !important;"
+        "color:#E24B4A !important;}"
+        '[role="tab"][aria-selected="true"]{'
         "border-color:#E24B4A !important;"
         "background:rgba(226,75,74,0.18) !important;}"
         '[data-testid="stTabs"] div[data-baseweb="tab-highlight"]{display:none;}'
