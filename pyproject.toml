@@ -1,7 +1,7 @@
 [project]
 name = "gender-bias-auditing-tool"
 version = "0.1.0"
-description = "A five-stage pipeline to detect implicit gender bias in LLM outputs using a fine-tuned RoBERTa classifier with SHAP explainability."
+description = "A five-stage pipeline to detect implicit gender bias in LLM outputs using the pretrained HEARTS ALBERT-v2 classifier with SHAP explainability."
 requires-python = ">=3.11"
 
 dependencies = [

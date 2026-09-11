@@ -1,72 +1,88 @@
-# Gender Bias Auditing Dashboard
-
-A five-stage automated pipeline that detects implicit gender bias in LLM outputs using a fine-tuned RoBERTa classifier with SHAP token-level explainability. Results surface in a Streamlit dashboard comparing bias scores across models side by side.
-
+# Gender Bias Detector Dashboard
 **Louise Slattery — MSc Computer Science**
+
+A five-stage pipeline detecting gender bias in LLM outputs using the pretrained HEARTS ALBERT-v2 classifier with SHAP token-level explainability and divergence testing. The dashboard is a separate, read only Streamlit app that reads the pipeline's existing static output files.
+
+
+
+**View Dashboard here:** *[add Streamlit link once deployed]*
 
 ---
 
-## Dataset design
+## Pipeline
 
-| Stage | Dataset | Purpose |
+| Stage | Script | Output |
 |---|---|---|
-| Stage 1  probe bank | WinoBias + original probes | Restructured into conversational LLM prompts |
-| Stage 2  LLM query runner | GPT-4o and claude-opus-4-5 | Queries both models with all probes, collects LLM text completions |
-| Stage 3  classifier fine-tuning | StereoSet data used to fine-tune classifier | Fine-tunes pretrained RoBERTa base model with a classification head added, for binary bias detection |
-| Stage 4  SHAP explainability | Applies SHAP to the fine-tuned classifier to produce token-level attribution scores |
+| 1 — Probe bank | `src/stage1_probe_bank.py` | 250 gender-paired probes, 6 categories → `data/probe_bank.json` |
+| 2 — LLM query | `src/stage2_query_llm.py` | 1,000 completions (GPT-4o + Claude) → `data/completions.json` |
+| 3 — HEARTS classifier | `src/stage3_hearts.py` | Pretrained HEARTS ALBERT-v2, no fine-tuning → `data/hearts_predictions.json`, `data/hearts_summary.json` |
+| 3b — Divergence | `src/stage3b_divergence.py` | Male vs. female label comparison → `data/divergence_results.json` |
+| 4 — SHAP | `src/stage4_shap.py` | Token-level attribution → `data/hearts_shap_values.json` |
+| 5 — Dashboard | `src/dashboard/app.py` | It reads directly from the files already in `data/` each time it loads; does not trigger or depend on running Stages 1–4 |
 
+Note: `src/stage3_roberta_legacy.py` is retained for reference only — superseded by HEARTS, not part of the active pipeline.
 
-## Setup
+---
 
-### 1. Clone and create virtual environment
+## Quick start — view dashboard only, which is the intended route to show results.
+
+No API keys needed; pre-generated data files are already committed.
+
+```bash
+git clone https://github.com/LouiseS-ux/BiasfinalP
+cd BiasfinalP
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+streamlit run src/dashboard/app.py
+```
+
+---
+
+## Full setup — For reference here are instructions to rerun pipeline
+
+**Warning:** rerunning the pipeline overwrites the data files the dashboard currently reads from. Stage 2's LLM completions are not guaranteed to be identical on a rerun, so classifier results, bias percentages, and divergence figures may differ from those currently shown on the dashboard and reported in the dissertation.
+
+**Instead, please view the existing, documented results using the Quick start section above — no new pipeline run needed.**
+
+------------------------------------------------------------------------------
+Just for reference: To run all stages in sequence for full setup:
+```bash
+python run_pipeline.py
+```
+
 ```bash
 git clone https://github.com/LouiseS-ux/BiasfinalP
 cd BiasfinalP
 python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
-```
-
-### 2. Add API keys
-```bash
 cp .env.example .env
-# Edit .env and add your OPENAI_API_KEY and ANTHROPIC_API_KEY
-```
-
-### 3. Install pre-commit hooks
-```bash
+# add OPENAI_API_KEY and ANTHROPIC_API_KEY to .env
 pre-commit install
 ```
 
----
-
-## Run the pipeline
-
+Run stages in order:
 ```bash
-# Run all stages in sequence
-python run_pipeline.py
-
-# Or run stages individually:
 python src/stage1_probe_bank.py
 python src/stage2_query_llm.py
-python src/stage3_classifier.py --mode train
-python src/stage3_classifier.py --mode inference
+python src/stage3_hearts.py
+python src/stage3b_divergence.py
 python src/stage4_shap.py
-streamlit run src/dashboard/app.py
 ```
 
+HEARTS ALBERT-v2 downloads automatically from HuggingFace on first run.
 ---
 
-## Run tests
+## Tests
 
 ```bash
-pytest
-pytest tests/unit/
-pytest tests/integration/
+pytest --cov=src --cov-report=term-missing --cov-fail-under=80
 ```
 
 ---
 
-## Model checkpoint
+## Configuration
 
-Not committed to Git due to file size. Reproduce by running Stage 3 train after Stage 2 completes.
+All paths and settings are in `config.yaml`
+—  active classifier uses (HEARTS) not legacy (RoBERTa).
