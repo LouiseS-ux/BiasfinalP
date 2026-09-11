@@ -7,6 +7,9 @@ pandas
 numpy
 streamlit
 pytest
-ruffopenai
+ruff
+openai
 anthropic
 python-dotenv
+pydantic
+pyyaml
