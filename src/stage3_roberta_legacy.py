@@ -1,4 +1,4 @@
-"""Stage 3 — RoBERTa classifier.
+"""Stage 3 — RoBERTa classifier. Legacy.
 
 Fine-tunes on StereoSet (--mode train) or classifies completions (--mode inference).
 """

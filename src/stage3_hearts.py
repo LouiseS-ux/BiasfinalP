@@ -3,7 +3,8 @@
 Loads the holistic-ai/bias_classifier_albertv2 model from HuggingFace and
 runs inference on all completions in data/completions.json. Writes results
 to data/hearts_predictions.json and a summary to data/hearts_summary.json.
-Keeps all outputs separate from the existing RoBERTa pipeline outputs.
+Keeps all outputs separate from the existing RoBERTa legacy pipeline outputs,
+ as this is the replacement final classifier.
 
 LABEL_1 = stereotype (biased), LABEL_0 = not_stereotype (not_biased).
 Label mapping confirmed from HEARTS Logistic_Regression.py source code.
