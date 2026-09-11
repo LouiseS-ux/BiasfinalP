@@ -93,41 +93,41 @@ class TestLoadProbeBank:
 
 
 class TestValidateProbeBank:
-    def test_passes_with_valid_150_probes(self) -> None:
-        validate_probe_bank(_make_probes(150))
+    def test_passes_with_valid_250_probes(self) -> None:
+        validate_probe_bank(_make_probes(250))
 
     def test_raises_on_count_too_low(self) -> None:
-        with pytest.raises(ValueError, match="Expected 150"):
-            validate_probe_bank(_make_probes(149))
+        with pytest.raises(ValueError, match="Expected 250"):
+            validate_probe_bank(_make_probes(249))
 
     def test_raises_on_count_too_high(self) -> None:
-        with pytest.raises(ValueError, match="Expected 150"):
-            validate_probe_bank(_make_probes(151))
+        with pytest.raises(ValueError, match="Expected 250"):
+            validate_probe_bank(_make_probes(251))
 
     def test_raises_on_duplicate_ids(self) -> None:
-        probes = _make_probes(150)
+        probes = _make_probes(250)
         probes[5] = _make_probe(probe_id="wb_001")
         with pytest.raises(ValueError, match="Duplicate"):
             validate_probe_bank(probes)
 
     def test_raises_on_invalid_source(self) -> None:
-        probes = _make_probes(150)
+        probes = _make_probes(250)
         probes[0] = _make_probe(probe_id="wb_001", source="stereoset")
         with pytest.raises(ValueError, match="Invalid source"):
             validate_probe_bank(probes)
 
     def test_raises_on_invalid_category(self) -> None:
-        probes = _make_probes(150)
+        probes = _make_probes(250)
         probes[0] = _make_probe(probe_id="wb_001", category="unknown")
         with pytest.raises(ValueError, match="Invalid category"):
             validate_probe_bank(probes)
 
     def test_accepts_all_valid_sources(self) -> None:
         probes = [
-            _make_probe(probe_id=f"wb_{i:03d}", source="winobias") for i in range(1, 76)
+            _make_probe(probe_id=f"wb_{i:03d}", source="winobias") for i in range(1, 46)
         ] + [
             _make_probe(probe_id=f"orig_{i:03d}", source="original")
-            for i in range(1, 76)
+            for i in range(1, 206)
         ]
         validate_probe_bank(probes)
 
@@ -137,10 +137,12 @@ class TestValidateProbeBank:
             "personality_trait",
             "ambiguous_scenario",
             "coreference_ambiguity",
+            "candidate_choice",
+            "coreference_choice",
         ]
         probes = [
-            _make_probe(probe_id=f"wb_{i:03d}", category=cats[i % 4])
-            for i in range(1, 151)
+            _make_probe(probe_id=f"wb_{i:03d}", category=cats[i % 6])
+            for i in range(1, 251)
         ]
         validate_probe_bank(probes)
 
@@ -158,7 +160,7 @@ class TestLogSummary:
 class TestMain:
     def test_calls_load_validate_and_log(self, tmp_path: Path) -> None:
         config = {"paths": {"probe_bank": str(tmp_path / "probe_bank.json")}}
-        probes = _make_probes(150)
+        probes = _make_probes(250)
         with (
             patch("src.stage1_probe_bank._load_config", return_value=config),
             patch(
@@ -188,7 +190,7 @@ class TestMain:
     def test_does_not_write_file(self, tmp_path: Path) -> None:
         output = tmp_path / "probe_bank.json"
         config = {"paths": {"probe_bank": str(output)}}
-        probes = _make_probes(150)
+        probes = _make_probes(250)
         with (
             patch("src.stage1_probe_bank._load_config", return_value=config),
             patch("src.stage1_probe_bank.load_probe_bank", return_value=probes),
