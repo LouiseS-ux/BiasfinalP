@@ -39,11 +39,11 @@ streamlit run src/dashboard/app.py
 
 ---
 
-## Full setup — For reference here are instructions to rerun pipeline
+## Full setup — For reference only, here are instructions to rerun pipeline
 
 **Warning:** rerunning the pipeline overwrites the data files the dashboard currently reads from. Stage 2's LLM completions are not guaranteed to be identical on a rerun, so classifier results, bias percentages, and divergence figures may differ from those currently shown on the dashboard and reported in the dissertation.
 
-**Instead, please view the existing, documented results using the Quick start section above — no new pipeline run needed.**
+**Instead, please view the existing, documented results using the Quick start section or the deployed Streamlit browser dashboard — no new pipeline run needed.**
 
 ------------------------------------------------------------------------------
 Just for reference: To run all stages in sequence for full setup:
