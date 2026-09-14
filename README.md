@@ -1,11 +1,24 @@
 # Gender Bias Detector Dashboard
 **Louise Slattery — MSc Computer Science**
 
-A five-stage pipeline detecting gender bias in LLM outputs using the pretrained HEARTS ALBERT-v2 classifier with SHAP token-level explainability and divergence testing. The dashboard is a separate, read only Streamlit app that reads the pipeline's existing static output files.
+A five-stage pipeline detecting gender bias in LLM outputs using the pretrained HEARTS ALBERT-v2 classifier with SHAP token-level explainability and divergence testing. The dashboard is a separate Streamlit app that reads the pipeline's existing static output files.
 
 
 
-**View Dashboard here:** https://genderbiasdetector.streamlit.app/
+**View Dashboard in browser here:** https://genderbiasdetector.streamlit.app/
+
+
+## Quick start — 
+
+```bash
+git clone https://github.com/LouiseS-ux/BiasfinalP
+cd BiasfinalP
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+streamlit run src/dashboard/app.py
+```
+No API keys needed; pre-generated data files are already committed.
 
 ---
 
@@ -21,21 +34,6 @@ A five-stage pipeline detecting gender bias in LLM outputs using the pretrained 
 | 5 — Dashboard | `src/dashboard/app.py` | It reads directly from the files already in `data/` each time it loads; does not trigger or depend on running Stages 1–4 |
 
 Note: `src/stage3_roberta_legacy.py` is retained for reference only — superseded by HEARTS, not part of the active pipeline.
-
----
-
-## Quick start — view dashboard only, which is the intended route to show results.
-
-No API keys needed; pre-generated data files are already committed.
-
-```bash
-git clone https://github.com/LouiseS-ux/BiasfinalP
-cd BiasfinalP
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
-streamlit run src/dashboard/app.py
-```
 
 ---
 
